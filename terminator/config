@@ -1,0 +1,16 @@
+[global_config]
+  title_receive_bg_color = "#000000"
+  title_transmit_bg_color = "#5a9bc8"
+[keybindings]
+[profiles]
+  [[default]]
+    background_image = None
+[layouts]
+  [[default]]
+    [[[child1]]]
+      type = Terminal
+      parent = window0
+    [[[window0]]]
+      type = Window
+      parent = ""
+[plugins]
