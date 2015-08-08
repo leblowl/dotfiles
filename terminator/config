@@ -1,6 +1,6 @@
 [global_config]
-  title_receive_bg_color = "#000000"
-  title_transmit_bg_color = "#5a9bc8"
+  title_receive_bg_color = "#5a9bc8"
+  title_transmit_bg_color = "#5ac887"
 [keybindings]
 [profiles]
   [[default]]
