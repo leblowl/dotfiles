@@ -1,0 +1,3 @@
+feh --bg-scale ~/Pictures/Wallpaper/dreamland.jpg &
+tint2 &
+nm-applet &
