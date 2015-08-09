@@ -257,6 +257,12 @@
         <command>thunar</command>
       </action>
     </keybind>
+
+    <keybind key="XF86PowerOff">
+      <action name="Execute">
+        <command>~/.config/openbox/shutdown.sh</command>
+      </action>
+    </keybind>
   </keyboard>
   <mouse>
     <dragThreshold>1</dragThreshold>
