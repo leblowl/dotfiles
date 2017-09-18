@@ -1,18 +1,19 @@
-" dein Scripts-----------------------------
+"dein Scripts-----------------------------
 if &compatible
   set nocompatible               " Be iMproved
 endif
 
 " Required:
-set runtimepath+=/home/lucas/.config/nvim/repos/github.com/Shougo/dein.vim
+set runtimepath+=/home/lucas/.local/share/dein/repos/github.com/Shougo/dein.vim
 
 " Required:
-if dein#load_state('/home/lucas/.config/nvim')
-  call dein#begin('/home/lucas/.config/nvim')
+if dein#load_state('/home/lucas/.local/share/dein')
+  call dein#begin('/home/lucas/.local/share/dein')
 
   " Let dein manage dein
   " Required:
-  call dein#add('/home/lucas/.config/nvim/repos/github.com/Shougo/dein.vim')
+  call dein#add('/home/lucas/.local/share/dein/repos/github.com/Shougo/dein.vim')
+" dein Scripts-----------------------------
 
   " Add or remove your plugins here:
   call dein#add('Shougo/neosnippet.vim')
@@ -41,13 +42,17 @@ endif
 
 "End dein Scripts-------------------------
 
+" Color
+set background=light  
+colorscheme solarized
+
 " Path
 set runtimepath+=/home/lucas/.config/nvim/repos/github.com/Shougo/deoplete.nvim
 set runtimepath+=/home/lucas/.config/nvim/repos/github.com/scrooloose/nerdtree
 
 " Python
 let g:python_host_prog = '/usr/bin/python'
-let g:python3_host_prog = '/home/lucas/.virtualenvs/env/bin/python3.6'
+let g:python3_host_prog = '/home/lucas/virtualenvs/env/bin/python3.6'
 
 " Deoplete
 call deoplete#enable()
