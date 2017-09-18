@@ -52,6 +52,14 @@ URxvt.cursorUnderline:      false
 ! Pointer
 URxvt.intensifyStyles:      false
 
+! Disable Control + Shift default
+URxvt*iso14755: False
+URxvt*iso14755_52: False
+
+! Copy/Paste
+URxvt.keysym.Shift-Control-V: eval:paste_clipboard
+URxvt.keysym.Shift-Control-C: eval:selection_to_clipboard
+
 !!Source http://github.com/solarized/xresources
 #define S_base03        #002b36
 #define S_base02        #073642
