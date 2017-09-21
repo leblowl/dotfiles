@@ -67,7 +67,7 @@ autocmd FileType python nnoremap <leader>y :0,$!yapf<Cr>
 " NERDTree
 silent! map <F3> :NERDTreeToggle<CR>
 silent! map <F2> :NERDTreeFind<CR>
-let NERDTreeIgnore = ['\.pyc$']
+let NERDTreeIgnore = ['__pycache__', '\.pyc$']
 
 " Window navigation
 noremap <C-J> <C-W>w
