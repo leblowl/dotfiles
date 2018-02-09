@@ -315,6 +315,8 @@ layers configuration.
 This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
+  ;; Disable error buffer popup window in cider repl
+  (setq cider-show-error-buffer 'except-in-repl)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
