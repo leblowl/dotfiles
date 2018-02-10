@@ -317,6 +317,12 @@ explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
   ;; Disable error buffer popup window in cider repl
   (setq cider-show-error-buffer 'except-in-repl)
+  ;; Get ctrl + j/k keybindings working for command history scroll in cider repl
+  (evil-define-key 'normal cider-repl-mode-map
+    (kbd "C-j") 'cider-repl-next-input
+    (kbd "C-k") 'cider-repl-previous-input)
+  ;; Increase default delay for special evil-escape key sequence
+  (setq-default evil-escape-delay 0.2)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
