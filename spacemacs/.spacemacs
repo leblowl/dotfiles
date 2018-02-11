@@ -60,6 +60,8 @@ values."
    dotspacemacs-additional-packages
    '(
      zenburn-theme
+     lispy
+     lispyville
    )
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -307,6 +309,10 @@ executes.
  This function is mostly useful for variables that need to be set
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
+  ;; Better lisp support
+  (add-hook 'emacs-lisp-mode-hook #'lispy-mode)
+  (add-hook 'clojure-mode-hook #'lispy-mode)
+  (add-hook 'lispy-mode-hook #'lispyville-mode)
   )
 
 (defun dotspacemacs/user-config ()
@@ -326,9 +332,6 @@ you should place your code here."
   (setq-default evil-escape-delay 0.2)
   ;; Disable entering lisp-state after list-state command
   (setq evil-lisp-state-enter-lisp-state-on-command nil)
-  ;; Enable cleverparens to prevent deletions from unbalancing parens
-  (spacemacs/toggle-evil-cleverparens-on)
-  (add-hook 'clojure-mode-hook #'evil-cleverparens-mode)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
