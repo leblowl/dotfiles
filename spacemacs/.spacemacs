@@ -42,6 +42,7 @@ values."
      ;; auto-completion
      ;; better-defaults
      emacs-lisp
+     evil-cleverparens
      ;; git
      ;; markdown
      ;; org
@@ -271,7 +272,7 @@ values."
    dotspacemacs-folding-method 'evil
    ;; If non-nil smartparens-strict-mode will be enabled in programming modes.
    ;; (default nil)
-   dotspacemacs-smartparens-strict-mode nil
+   dotspacemacs-smartparens-strict-mode t
    ;; If non-nil pressing the closing parenthesis `)' key in insert mode passes
    ;; over any automatically added closing parenthesis, bracket, quote, etc…
    ;; This can be temporary disabled by pressing `C-q' before `)'. (default nil)
@@ -323,6 +324,11 @@ you should place your code here."
     (kbd "C-k") 'cider-repl-previous-input)
   ;; Increase default delay for special evil-escape key sequence
   (setq-default evil-escape-delay 0.2)
+  ;; Disable entering lisp-state after list-state command
+  (setq evil-lisp-state-enter-lisp-state-on-command nil)
+  ;; Enable cleverparens to prevent deletions from unbalancing parens
+  (spacemacs/toggle-evil-cleverparens-on)
+  (add-hook 'clojure-mode-hook #'evil-cleverparens-mode)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
