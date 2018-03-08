@@ -33,8 +33,8 @@ URxvt.allow_bold:           false
 !URxvt*boldFont: xft:DejaVu Sans Mono:antialias=true:pixelsize=15
 
 ! Source Code Pro
-URxvt*font: xft:Source Code Pro:regular:pixelsize=16antialias=false
-URxvt*boldFont: xft:Source Code Pro:regular:pixelsize=16antialias=false
+URxvt*font: xft:Source Code Variable:regular:pixelsize=15antialias=false
+URxvt*boldFont: xft:Source Code Variable:regular:pixelsize=15antialias=false
 
 ! Fix font space
 URxvt*letterSpace: -1
