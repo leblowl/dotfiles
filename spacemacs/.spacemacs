@@ -30,7 +30,8 @@ values."
    dotspacemacs-configuration-layer-path '()
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(
+   '(csv
+     python
      html
      ansible
      nginx
@@ -39,13 +40,13 @@ values."
      clojure
      sql
      helm
-     ;; auto-completion
+     auto-completion
      ;; better-defaults
      emacs-lisp
-     evil-cleverparens
-     ;; git
-     ;; markdown
-     ;; org
+     ;; evil-cleverparens
+     git
+     markdown
+     (org :variables org-projectile-file "TODO.org")
      ;; (shell :variables
      ;;        shell-default-height 30
      ;;        shell-default-position 'bottom)
@@ -141,7 +142,7 @@ values."
    dotspacemacs-colorize-cursor-according-to-state t
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
    ;; quickly tweak the mode-line size to make separators look not too crappy.
-   dotspacemacs-default-font '("Source Code Pro"
+   dotspacemacs-default-font '("Source Code Variable"
                                :size 16
                                :weight normal
                                :width normal
@@ -184,6 +185,7 @@ values."
    dotspacemacs-default-layout-name "Default"
    ;; If non nil the default layout name is displayed in the mode-line.
    ;; (default nil)
+   dotspacemacs-mode-line-theme 'spacemacs
    dotspacemacs-display-default-layout nil
    ;; If non nil then the last auto saved layouts are resume automatically upon
    ;; start. (default nil)
@@ -268,7 +270,7 @@ values."
    ;;                       text-mode
    ;;   :size-limit-kb 1000)
    ;; (default nil)
-   dotspacemacs-line-numbers nil
+   dotspacemacs-line-numbers `relative
    ;; Code folding method. Possible values are `evil' and `origami'.
    ;; (default 'evil)
    dotspacemacs-folding-method 'evil
@@ -299,7 +301,7 @@ values."
    ;; `trailing' to delete only the whitespace at end of lines, `changed'to
    ;; delete only whitespace for changed lines or `nil' to disable cleanup.
    ;; (default nil)
-   dotspacemacs-whitespace-cleanup nil
+   dotspacemacs-whitespace-cleanup `all
    ))
 
 (defun dotspacemacs/user-init ()
@@ -309,12 +311,15 @@ executes.
  This function is mostly useful for variables that need to be set
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
-  ;; Better lisp support
+
+  ;; turn off smartparens in Clojure mode
+  (add-hook 'clojure-mode-hook #'turn-off-smartparens-mode)
+
+  ;; better lisp support in Clojure mode
   (add-hook 'lispy-mode-hook #'lispyville-mode)
   (add-hook 'emacs-lisp-mode-hook #'lispy-mode)
   (add-hook 'clojure-mode-hook #'lispy-mode)
-  (add-hook 'cider-repl-mode-hook #'lispy-mode)
-  )
+  (add-hook 'cider-repl-mode-hook #'lispy-mode))
 
 (defun dotspacemacs/user-config ()
   "Configuration function for user code.
@@ -323,16 +328,29 @@ layers configuration.
 This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
-  ;; Disable error buffer popup window in cider repl
-  (setq cider-show-error-buffer 'except-in-repl)
+
+  ;; Disable error buffer popup window
+  (setq cider-show-error-buffer nil)
+  (setq cider-test-show-report-on-success t)
+
   ;; Get ctrl + j/k keybindings working for command history scroll in cider repl
   (evil-define-key 'normal cider-repl-mode-map
     (kbd "C-j") 'cider-repl-next-input
     (kbd "C-k") 'cider-repl-previous-input)
+
   ;; Increase default delay for special evil-escape key sequence
   (setq-default evil-escape-delay 0.2)
+
   ;; Disable entering lisp-state after list-state command
   (setq evil-lisp-state-enter-lisp-state-on-command nil)
+
+  ;; org-mode
+  (setq spaceline-org-clock-p t)
+  (setq org-todo-keywords
+        '((sequence "TODO" "IN_PROGRESS" "DONE")))
+
+  ;;JS indent
+  (setq js-indent-level 2)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
@@ -347,27 +365,49 @@ This function is called at the very end of Spacemacs initialization."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(evil-want-Y-yank-to-eol nil)
  '(package-selected-packages
    (quote
-    (paradox peg cider zenburn-theme yaml-mode ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package toc-org tagedit symon string-inflection sql-indent spaceline-all-the-icons slim-mode scss-mode sass-mode restart-emacs request rainbow-delimiters pug-mode popwin persp-mode pcre2el password-generator overseer org-plus-contrib org-bullets open-junk-file nginx-mode neotree nameless move-text macrostep lorem-ipsum livid-mode lispyville linum-relative link-hint less-css-mode json-mode js2-refactor js-doc jinja2-mode indent-guide impatient-mode hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation helm-xref helm-themes helm-swoop helm-purpose helm-projectile helm-mode-manager helm-make helm-flx helm-descbinds helm-css-scss helm-ag google-translate golden-ratio font-lock+ flx-ido fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-cleverparens evil-args evil-anzu emmet-mode elisp-slime-nav editorconfig dumb-jump diminish define-word counsel-projectile column-enforce-mode coffee-mode clojure-mode clean-aindent-mode cider-eval-sexp-fu centered-cursor-mode auto-highlight-symbol auto-compile ansible-doc ansible aggressive-indent ace-link ace-jump-helm-line))))
+    (yasnippet-snippets symon string-inflection spaceline-all-the-icons all-the-icons memoize sayid pippel pipenv password-generator overseer org-brain nameless magit-svn json-navigator hierarchy importmagic epc ctable concurrent deferred impatient-mode helm-xref helm-purpose window-purpose imenu-list evil-org evil-lion evil-goggles editorconfig counsel-projectile counsel clojure-cheatsheet cider centered-cursor-mode font-lock+ dotenv-mode smeargle orgit magit-gitflow helm-gitignore helm-company helm-c-yasnippet gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link fuzzy evil-magit magit magit-popup git-commit ghub let-alist with-editor company-web web-completion-data company-tern tern company-statistics company-ansible company-anaconda company clojure-snippets auto-yasnippet ac-ispell auto-complete csv-mode yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode dash-functional helm-pydoc cython-mode anaconda-mode pythonic org-projectile-helm org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download mmm-mode markdown-toc markdown-mode htmlize gnuplot gh-md yaml-mode ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package toc-org tagedit sql-indent spaceline powerline slim-mode scss-mode sass-mode restart-emacs request rainbow-delimiters pug-mode popwin persp-mode pcre2el paradox org-plus-contrib org-bullets open-junk-file nginx-mode neotree move-text macrostep lorem-ipsum livid-mode skewer-mode simple-httpd lispyville lispy zoutline swiper ivy linum-relative link-hint less-css-mode json-mode json-snatcher json-reformat js2-refactor js2-mode js-doc jinja2-mode indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile helm-flx helm-descbinds helm-css-scss helm-ag haml-mode google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-cleverparens smartparens evil-args evil-anzu anzu evil goto-chg undo-tree emmet-mode elisp-slime-nav dumb-jump diminish define-word column-enforce-mode coffee-mode clj-refactor hydra inflections edn multiple-cursors paredit yasnippet peg clean-aindent-mode cider-eval-sexp-fu eval-sexp-fu highlight seq spinner queue pkg-info clojure-mode epl bind-map bind-key auto-highlight-symbol auto-compile packed ansible-doc ansible f dash s aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async zenburn-theme)))
+ '(safe-local-variable-values
+   (quote
+    ((org-todo-keyword-faces
+      ("IN_PROGRESS" . "#F0DFAF"))
+     (org-todo-keyword-faces
+      ("IN_PROGRESS" . "#000000"))
+     (org-todo-keyword-faces
+      ("TODO" . "red")
+      ("IN_PROGRESS" . "orange")
+      ("DONE" . "green"))))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(default ((t (:foreground "#DCDCCC" :background "#3F3F3F")))))
 )
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(evil-want-Y-yank-to-eol nil)
  '(package-selected-packages
    (quote
-    (yaml-mode ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package toc-org tagedit sql-indent spaceline powerline slim-mode scss-mode sass-mode restart-emacs request rainbow-delimiters pug-mode popwin persp-mode pcre2el paradox org-plus-contrib org-bullets open-junk-file nginx-mode neotree move-text macrostep lorem-ipsum livid-mode skewer-mode simple-httpd lispyville lispy zoutline swiper ivy linum-relative link-hint less-css-mode json-mode json-snatcher json-reformat js2-refactor js2-mode js-doc jinja2-mode indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile helm-flx helm-descbinds helm-css-scss helm-ag haml-mode google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-cleverparens smartparens evil-args evil-anzu anzu evil goto-chg undo-tree emmet-mode elisp-slime-nav dumb-jump diminish define-word column-enforce-mode coffee-mode clj-refactor hydra inflections edn multiple-cursors paredit yasnippet peg clean-aindent-mode cider-eval-sexp-fu eval-sexp-fu highlight cider seq spinner queue pkg-info clojure-mode epl bind-map bind-key auto-highlight-symbol auto-compile packed ansible-doc ansible f dash s aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async zenburn-theme))))
+    (smeargle orgit magit-gitflow helm-gitignore helm-company helm-c-yasnippet gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link fuzzy evil-magit magit magit-popup git-commit ghub let-alist with-editor company-web web-completion-data company-tern tern company-statistics company-ansible company-anaconda company clojure-snippets auto-yasnippet ac-ispell auto-complete csv-mode yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode dash-functional helm-pydoc cython-mode anaconda-mode pythonic org-projectile-helm org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download mmm-mode markdown-toc markdown-mode htmlize gnuplot gh-md yaml-mode ws-butler winum which-key web-mode web-beautify volatile-highlights vi-tilde-fringe uuidgen use-package toc-org tagedit sql-indent spaceline powerline slim-mode scss-mode sass-mode restart-emacs request rainbow-delimiters pug-mode popwin persp-mode pcre2el paradox org-plus-contrib org-bullets open-junk-file nginx-mode neotree move-text macrostep lorem-ipsum livid-mode skewer-mode simple-httpd lispyville lispy zoutline swiper ivy linum-relative link-hint less-css-mode json-mode json-snatcher json-reformat js2-refactor js2-mode js-doc jinja2-mode indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile helm-flx helm-descbinds helm-css-scss helm-ag haml-mode google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-cleverparens smartparens evil-args evil-anzu anzu evil goto-chg undo-tree emmet-mode elisp-slime-nav dumb-jump diminish define-word column-enforce-mode coffee-mode clj-refactor hydra inflections edn multiple-cursors paredit yasnippet peg clean-aindent-mode cider-eval-sexp-fu eval-sexp-fu highlight seq spinner queue pkg-info clojure-mode epl bind-map bind-key auto-highlight-symbol auto-compile packed ansible-doc ansible f dash s aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async zenburn-theme)))
+ '(safe-local-variable-values
+   (quote
+    ((org-todo-keyword-faces
+      ("IN_PROGRESS" . "#F0DFAF"))
+     (org-todo-keyword-faces
+      ("IN_PROGRESS" . "#000000"))
+     (org-todo-keyword-faces
+      ("TODO" . "red")
+      ("IN_PROGRESS" . "orange")
+      ("DONE" . "green"))))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(default ((t (:foreground "#DCDCCC" :background "#3F3F3F")))))
