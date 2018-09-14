@@ -41,7 +41,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (magit clojure-mode neotree projectile general which-key helm zenburn-theme evil use-package))))
+    (cider lispyville lispy magit clojure-mode neotree projectile general which-key helm zenburn-theme evil use-package))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -86,9 +86,10 @@
    "wh"  '(windmove-left :which-key "move left")
    "wk"  '(windmove-up :which-key "move up")
    "wj"  '(windmove-down :which-key "move bottom")
-   "w/"  '(split-window-right :which-key "split right")
-   "w-"  '(split-window-below :which-key "split bottom")
+   "w/"  '(split-window-right :which-key "split window right")
+   "w-"  '(split-window-below :which-key "split window bottom")
    "wd"  '(delete-window :which-key "kill window")
+   "wm"  '(delete-other-windows :which-key "delete other windows")
 
    ;; Others
    "at"  '(ansi-term :which-key "open terminal")
@@ -105,20 +106,26 @@
   :ensure t
   :init
   (setq helm-M-x-fuzzy-match t
-  helm-mode-fuzzy-match t
-  helm-buffers-fuzzy-matching t
-  helm-recentf-fuzzy-match t
-  helm-locate-fuzzy-match t
-  helm-semantic-fuzzy-match t
-  helm-imenu-fuzzy-match t
-  helm-completion-in-region-fuzzy-match t
-  helm-candidate-number-list 150
-  helm-split-window-in-side-p t
-  helm-move-to-line-cycle-in-source t
-  helm-echo-input-in-header-line t
-  helm-autoresize-max-height 0
-  helm-autoresize-min-height 20)
+	helm-mode-fuzzy-match t
+	helm-buffers-fuzzy-matching t
+	helm-recentf-fuzzy-match t
+        helm-locate-fuzzy-match t
+        helm-semantic-fuzzy-match t
+        helm-imenu-fuzzy-match t
+        helm-completion-in-region-fuzzy-match t
+        helm-candidate-number-list 150
+        helm-split-window-in-side-p t
+        helm-move-to-line-cycle-in-source t
+        helm-echo-input-in-header-line t
+        helm-autoresize-max-height 0
+        helm-autoresize-min-height 20)
+
   :config
+  (general-define-key
+   :states  '(normal emacs)
+   :keymaps 'helm-map
+   "<tab>"  'helm-select-action)
+
   (helm-mode 1))
 
 ;; Projectile
@@ -156,8 +163,8 @@
   :ensure t
   :config
   (general-define-key
-   :states '(normal emacs)
-   :keymaps 'neotree-mode-map
+   :states   '(normal emacs)
+   :keymaps  'neotree-mode-map
    "n"       'neotree-select-next-sibling-node
    "p"       'neotree-select-previous-sibling-node
    "h"       'spacemacs/neotree-collapse-or-up
@@ -172,8 +179,23 @@
    "<tab>"   'neotree-enter
    "l"       '(neotree-enter :which-key "enter")))
 
-;; Clojure mode
+;; Clojure
 (use-package clojure-mode
+  :ensure t)
+
+(use-package lispy
+  :ensure t
+  :config
+  (add-hook 'emacs-lisp-mode-hook (lambda () (lispy-mode 1)))
+  (add-hook 'clojure-mode-hook (lambda () (lispy-mode 1)))
+  (setq lispy-compat '(cider edebug)))
+
+(use-package lispyville
+  :ensure t
+  :config
+  (add-hook 'lispy-mode-hook #'lispyville-mode))
+
+(use-package cider
   :ensure t)
 
 ;; Magit
