@@ -4,6 +4,9 @@
 (menu-bar-mode   -1)
 (global-display-line-numbers-mode t)
 
+;; Disable tabs
+(setq-default indent-tabs-mode nil)
+
 ;; Disable blinking cursor
 (blink-cursor-mode 0)
 (setq visible-cursor nil)
@@ -149,9 +152,9 @@ or the current buffer directory."
   :ensure t
   :init
   (setq helm-M-x-fuzzy-match t
-	helm-mode-fuzzy-match t
-	helm-buffers-fuzzy-matching t
-	helm-recentf-fuzzy-match t
+        helm-mode-fuzzy-match t
+        helm-buffers-fuzzy-matching t
+        helm-recentf-fuzzy-match t
         helm-locate-fuzzy-match t
         helm-semantic-fuzzy-match t
         helm-imenu-fuzzy-match t
@@ -215,22 +218,22 @@ or the current buffer directory."
      neo-modern-sidebar t
      neo-vc-integration nil))
 
-    (general-define-key
-     :states   '(normal emacs)
-     :keymaps  'neotree-mode-map
-     "n"       'neotree-select-next-sibling-node
-     "p"       'neotree-select-previous-sibling-node
-     "h"       'spacemacs/neotree-collapse-or-up
-     "H"       'neotree-hidden-file-toggle
-     "y"       'neotree-copy-node
-     "c"       'neotree-create-node
-     "R"       'neotree-change-root
-     "r"       'neotree-rename-node
-     "o"       'neotree-open-file-in-system-application
-     "d"       'neotree-delete-node
-     "RET"     'neotree-enter
-     "<tab>"   'neotree-enter
-     "l"       '(neotree-enter :which-key "enter")))
+  (general-define-key
+   :states   '(normal emacs)
+   :keymaps  'neotree-mode-map
+   "n"       'neotree-select-next-sibling-node
+   "p"       'neotree-select-previous-sibling-node
+   "h"       'spacemacs/neotree-collapse-or-up
+   "H"       'neotree-hidden-file-toggle
+   "y"       'neotree-copy-node
+   "c"       'neotree-create-node
+   "R"       'neotree-change-root
+   "r"       'neotree-rename-node
+   "o"       'neotree-open-file-in-system-application
+   "d"       'neotree-delete-node
+   "RET"     'neotree-enter
+   "<tab>"   'neotree-enter
+   "l"       '(neotree-enter :which-key "enter")))
 
 ;; Clojure
 (use-package clojure-mode
