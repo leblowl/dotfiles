@@ -16,10 +16,14 @@
 (setq make-backup-files nil) ; stop creating backup~ files
 (setq auto-save-default nil) ; stop creating #autosave# files
 
-;; Font & dimensions
+;; Whitespace
+;;   Show it
+(setq-default show-trailing-whitespace t)
+;;   Delete it on save
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
+
+;; Font
 (add-to-list 'default-frame-alist '(font . "Source Code Variable"))
-(add-to-list 'default-frame-alist '(height . 24))
-(add-to-list 'default-frame-alist '(width . 80))
 
 ;; Package configs
 (require 'package)
@@ -43,7 +47,7 @@
  '(inhibit-startup-screen t)
  '(package-selected-packages
    (quote
-    (telephone-line telelphone-line cider lispyville lispy magit clojure-mode neotree projectile general which-key helm zenburn-theme evil use-package))))
+    (company company-mode telephone-line telelphone-line cider lispyville lispy magit clojure-mode neotree projectile general which-key helm zenburn-theme evil use-package))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -90,12 +94,16 @@ or the current buffer directory."
 (use-package general
   :ensure t
   :config
+
+  ;; Basic navigation
   (general-define-key
-   :states '(normal visual insert emacs)
-   :prefix "SPC"
+   :keymaps           '(normal visual insert emacs)
+   :prefix            "SPC"
    :non-normal-prefix "M-SPC"
+
    "TAB" '(switch-to-prev-buffer :which-key "previous buffer")
    "SPC" '(helm-M-x :which-key "M-x")
+
    ;; Project
    "pf"  '(helm-find-files :which-key "find files")
    "pt"  '(neotree-project-dir-toggle :which-key "project tree")
@@ -118,14 +126,22 @@ or the current buffer directory."
    ;; Others
    "at"  '(ansi-term :which-key "open terminal"))
 
+  ;; Global C-g override
   (general-define-key
-   :keymaps 'key-translation-map "ESC" "C-g"))
+   :keymaps 'key-translation-map "ESC" "C-g")
 
+  ;; Emacs Lisp
+  (general-define-key
+   :state   'normal
+   :keymaps 'emacs-lisp-mode-map
+   :prefix  ","
+   "eb" 'eval-buffer))
 
 ;; Vim mode
 (use-package evil
   :ensure t
   :config
+  (setq evil-want-integration 1)
   (evil-mode 1))
 
 ;; Helm
@@ -218,27 +234,51 @@ or the current buffer directory."
 
 ;; Clojure
 (use-package clojure-mode
-  :ensure t)
+  :ensure t
+  :config
+  (progn
+    (general-define-key
+     :states  'normal
+     :keymaps 'clojure-mode-map
+     :prefix  ","
+     "sc"     'cider-connect
+     "sf"     'cider-find-var)))
 
+;; Lisp nav
 (use-package lispy
   :ensure t
   :config
   (add-hook 'emacs-lisp-mode-hook (lambda () (lispy-mode 1)))
   (add-hook 'clojure-mode-hook (lambda () (lispy-mode 1)))
+  (add-hook 'cider-repl-mode-hook (lambda () (lispy-mode 1)))
   (setq lispy-compat '(cider edebug)))
 
+;; Lisp Evil nav
 (use-package lispyville
   :ensure t
   :config
   (add-hook 'lispy-mode-hook #'lispyville-mode))
 
 (use-package cider
-  :ensure t)
+  :ensure t
+  :config
+  (general-define-key
+   :states  'normal
+   :keymaps 'cider-repl-mode-map
+   :prefix  ","
+   "sc"     'cider-repl-clear-buffer))
 
-;; Magit
+;; Auto completion
+(use-package company
+  :ensure t
+  :config
+  (add-hook 'after-init-hook 'global-company-mode))
+
+;; Magit (Git)
 (use-package magit
   :ensure t)
 
+;; Fancy mode line
 (use-package telephone-line
   :ensure t
   :config
