@@ -2,6 +2,7 @@
 (tool-bar-mode   -1)
 (tooltip-mode    -1)
 (menu-bar-mode   -1)
+(global-display-line-numbers-mode t)
 
 ;; Disable blinking cursor
 (blink-cursor-mode 0)
@@ -39,9 +40,10 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(inhibit-startup-screen t)
  '(package-selected-packages
    (quote
-    (cider lispyville lispy magit clojure-mode neotree projectile general which-key helm zenburn-theme evil use-package))))
+    (telephone-line telelphone-line cider lispyville lispy magit clojure-mode neotree projectile general which-key helm zenburn-theme evil use-package))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -62,6 +64,28 @@
   :config
   (which-key-mode 1))
 
+(defun neotree-project-dir-toggle ()
+  "Open NeoTree using the project root, using find-file-in-project,
+or the current buffer directory."
+  (interactive)
+  (let ((project-dir
+         (ignore-errors
+           ;; Pick one: projectile or find-file-in-project
+           (projectile-project-root)
+           ;; (ffip-project-root)
+           ))
+        (file-name (buffer-file-name))
+        (neo-smart-open t))
+    (if (and (fboundp 'neo-global--window-exists-p)
+             (neo-global--window-exists-p))
+        (neotree-hide)
+      (progn
+        (neotree-show)
+        (if project-dir
+            (neotree-dir project-dir))
+        (if file-name
+            (neotree-find file-name))))))
+
 ;; Custom keybinding
 (use-package general
   :ensure t
@@ -70,15 +94,15 @@
    :states '(normal visual insert emacs)
    :prefix "SPC"
    :non-normal-prefix "M-SPC"
-
    "TAB" '(switch-to-prev-buffer :which-key "previous buffer")
    "SPC" '(helm-M-x :which-key "M-x")
    ;; Project
    "pf"  '(helm-find-files :which-key "find files")
-   "pt"  '(neotree-toggle :which-key "project tree")
+   "pt"  '(neotree-project-dir-toggle :which-key "project tree")
+   "pp"  'projectile-switch-project
 
    ;; Buffers
-   "bb"  '(helm-buffers-list :which-key "list buffers")
+   "bb"  '(helm-mini :which-key "helm mini")
    "bd"  '(kill-current-buffer :whick-key "kill buffer")
 
    ;; Window
@@ -92,8 +116,11 @@
    "wm"  '(delete-other-windows :which-key "delete other windows")
 
    ;; Others
-   "at"  '(ansi-term :which-key "open terminal")
-))
+   "at"  '(ansi-term :which-key "open terminal"))
+
+  (general-define-key
+   :keymaps 'key-translation-map "ESC" "C-g"))
+
 
 ;; Vim mode
 (use-package evil
@@ -121,11 +148,6 @@
         helm-autoresize-min-height 20)
 
   :config
-  (general-define-key
-   :states  '(normal emacs)
-   :keymaps 'helm-map
-   "<tab>"  'helm-select-action)
-
   (helm-mode 1))
 
 ;; Projectile
@@ -162,22 +184,37 @@
 (use-package neotree
   :ensure t
   :config
-  (general-define-key
-   :states   '(normal emacs)
-   :keymaps  'neotree-mode-map
-   "n"       'neotree-select-next-sibling-node
-   "p"       'neotree-select-previous-sibling-node
-   "h"       'spacemacs/neotree-collapse-or-up
-   "H"       'neotree-hidden-file-toggle
-   "y"       'neotree-copy-node
-   "c"       'neotree-create-node
-   "R"       'neotree-change-root
-   "r"       'neotree-rename-node
-   "o"       'neotree-open-file-in-system-application
-   "d"       'neotree-delete-node
-   "RET"     'neotree-enter
-   "<tab>"   'neotree-enter
-   "l"       '(neotree-enter :which-key "enter")))
+  (progn
+    (setq
+     neo-theme 'nerd
+     neo-window-width 32
+     neo-create-file-auto-open t
+     neo-show-updir-line nil
+     neo-mode-line-type 'neotree
+     neo-smart-open t
+     neo-dont-be-alone t
+     neo-persist-show nil
+     neo-show-hidden-files t
+     neo-auto-indent-point t
+     neo-modern-sidebar t
+     neo-vc-integration nil))
+
+    (general-define-key
+     :states   '(normal emacs)
+     :keymaps  'neotree-mode-map
+     "n"       'neotree-select-next-sibling-node
+     "p"       'neotree-select-previous-sibling-node
+     "h"       'spacemacs/neotree-collapse-or-up
+     "H"       'neotree-hidden-file-toggle
+     "y"       'neotree-copy-node
+     "c"       'neotree-create-node
+     "R"       'neotree-change-root
+     "r"       'neotree-rename-node
+     "o"       'neotree-open-file-in-system-application
+     "d"       'neotree-delete-node
+     "RET"     'neotree-enter
+     "<tab>"   'neotree-enter
+     "l"       '(neotree-enter :which-key "enter")))
 
 ;; Clojure
 (use-package clojure-mode
@@ -202,3 +239,7 @@
 (use-package magit
   :ensure t)
 
+(use-package telephone-line
+  :ensure t
+  :config
+  (telephone-line-mode 1))
