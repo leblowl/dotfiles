@@ -207,8 +207,9 @@ or the current buffer directory."
    :states  'normal
    :keymaps 'clojure-mode-map
    :prefix  dft-prefix-key
-   "sc"     'cider-connect
-   "sf"     'cider-find-var))
+   "s"      '(               :which-key "Cider")
+   "sc"     '(cider-connect  :which-key "Connect")
+   "sf"     '(cider-find-var :which-key "Find var")))
 
 ;; Lisp nav
 (use-package lispy
@@ -220,12 +221,13 @@ or the current buffer directory."
    :states  'normal
    :keymaps '(clojure-mode-map emacs-lisp-mode-map cider-repl-mode-map)
    :prefix  dft-prefix-key
-   "kdx"    'lispy-kill
-   "kdd"    'lispy-kill-at-point
-   "kdw"    'lispy-kill-word
-   "kds"    'lispy-kill-sentence
-   "kF"     'lispy-follow
-   "km"     'lispy-mark-symbol)
+   "k"      '(                    :which-key "Lispy")
+   "kdx"    '(lispy-kill          :which-key "Kill")
+   "kdd"    '(lispy-kill-at-point :which-key "Kill at point")
+   "kdw"    '(lispy-kill-word     :which-key "Kill word")
+   "kds"    '(lispy-kill-sentence :which-key "Kill sentence")
+   "kF"     '(lispy-follow        :which-key "Follow")
+   "km"     '(lispy-mark-symbol   :which-key "Mark symbol"))
 
   (add-hook 'emacs-lisp-mode-hook (lambda () (lispy-mode 1)))
   (add-hook 'clojure-mode-hook    (lambda () (lispy-mode 1)))
@@ -277,36 +279,43 @@ or the current buffer directory."
  :keymaps '(normal visual emacs)
  :prefix  dft-prefix-key
 
- "TAB" '(switch-to-prev-buffer :which-key "Buffer previous")
+ "TAB" '(switch-to-prev-buffer :which-key "Buffer prev")
  "SPC" '(helm-M-x              :which-key "M-x")
 
  ;; Project
- "pf"  '(helm-find-files            :which-key "Project find file")
- "pt"  '(neotree-project-dir-toggle :which-key "Project tree")
- "pp"  '(projectile-switch-project  :which-key "Project switch")
- "ps"  '(helm-ag                    :which-key "Project search")
+ "p"   '(                           :which-key "Project")
+ "pf"  '(helm-find-files            :which-key "Find file")
+ "pt"  '(neotree-project-dir-toggle :which-key "Open tree")
+ "pp"  '(projectile-switch-project  :which-key "Switch project")
+ "ps"  '(helm-ag                    :which-key "Search")
+ "pr"  '(projectile-recentf         :which-key "Recentf")
 
  ;; Files
- "ff"  '(find-file           :which-key "File find")
- "fr"  '(recentf             :which-key "File recent")
+ "f"   '(                    :which-key "File")
+ "ff"  '(find-file           :which-key "Find file")
+ "fr"  '(helm-recentf        :which-key "Recentf")
 
  ;; Buffers
- "bs"  '(switch-to-buffer    :which-key "Switch buffer")
- "bb"  '(helm-mini           :which-key "Helm mini")
- "bd"  '(kill-current-buffer :whick-key "Kill buffer")
+ "b"   '(                      :which-key "Buffer")
+ "bh"  '(switch-to-prev-buffer :which-key "Previous")
+ "bl"  '(switch-to-next-buffer :which-key "Next")
+ "bs"  '(switch-to-buffer      :which-key "Switch buffer")
+ "bb"  '(helm-mini             :which-key "Helm mini")
+ "bd"  '(kill-current-buffer   :whick-key "Kill")
 
  ;; Window
- "wl"  '(windmove-right       :which-key "Window move right")
- "wh"  '(windmove-left        :which-key "Window move left")
- "wk"  '(windmove-up          :which-key "Window move up")
- "wj"  '(windmove-down        :which-key "Window move bottom")
- "w/"  '(split-window-right   :which-key "Window split right")
- "w-"  '(split-window-below   :which-key "Window split bottom")
+ "w"   '(                     :which-key "Window")
+ "wl"  '(windmove-right       :which-key "Move right")
+ "wh"  '(windmove-left        :which-key "Move left")
+ "wk"  '(windmove-up          :which-key "Move up")
+ "wj"  '(windmove-down        :which-key "Move bottom")
+ "w/"  '(split-window-right   :which-key "Split right")
+ "w-"  '(split-window-below   :which-key "Split bottom")
  "wd"  '(delete-window        :which-key "Window kill")
  "wm"  '(delete-other-windows :which-key "Window maximize")
 
  ;; Others
- "at"  '(ansi-term            :which-key "Terminal open"))
+ "t"  '(ansi-term            :which-key "Terminal"))
 
 ;; Global C-g override
 (general-define-key
@@ -317,4 +326,5 @@ or the current buffer directory."
  :states   'normal
  :keymaps  'emacs-lisp-mode-map
  :prefix   dft-prefix-key
+ "e"       '(            :which-key "Eval")
  "eb"      '(eval-buffer :which-key "Eval buffer"))
