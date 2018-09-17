@@ -1,15 +1,26 @@
-(scroll-bar-mode -1)
-(tool-bar-mode   -1)
-(tooltip-mode    -1)
 (menu-bar-mode   -1)
+(tool-bar-mode   -1)
+(scroll-bar-mode -1)
+(tooltip-mode    -1)
+
+(setq inhibit-splash-screen t
+      initial-scratch-message nil
+      initial-major-mode 'org-mode)
+
 (global-display-line-numbers-mode t)
 
 ;; Disable tabs
-(setq-default indent-tabs-mode nil)
+(setq tab-width 2
+      indent-tabs-mode nil)
 
 ;; Disable blinking cursor
 (blink-cursor-mode 0)
 (setq visible-cursor nil)
+
+;; Misc
+(setq echo-keystrokes 0.1
+      use-dialog-box nil
+      visible-bell t)
 
 ;; Show matching parens
 (setq show-paren-delay 0)
@@ -19,10 +30,17 @@
 (setq make-backup-files nil) ; stop creating backup~ files
 (setq auto-save-default nil) ; stop creating #autosave# files
 
+;; Make yes/no -> y/n
+(defalias 'yes-or-no-p 'y-or-n-p)
+
 ;; Whitespace
-;;   Show it
+;;   Show empty lines
+(setq-default indicate-empty-lines t)
+(when (not indicate-empty-lines)
+  (toggle-indicate-empty-lines))
+;;   Show trailing whitespace
 (setq-default show-trailing-whitespace t)
-;;   Delete it on save
+;;   Delete trailing whitespace on save
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
 ;; Font
@@ -48,9 +66,10 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(inhibit-startup-screen t)
+ '(org-agenda-files (quote ("~/.notes")))
  '(package-selected-packages
    (quote
-    (ivy magit company cider lispyville lispy clojure-mode evil helm-ag helm telephone-line neotree projectile general which-key zenburn-theme use-package))))
+    (rainbow-delimiters writegood-mode find-file-in-project ivy magit company cider lispyville lispy clojure-mode evil helm-ag helm telephone-line neotree projectile general which-key zenburn-theme use-package))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -91,8 +110,8 @@ or the current buffer directory."
   (let ((project-dir
          (ignore-errors
            ;; Pick one: projectile or find-file-in-project
-           (projectile-project-root)
-           ;; (ffip-project-root)
+           ;; (projectile-project-root)
+           (ffip-project-root)
            ))
         (file-name (buffer-file-name))
         (neo-smart-open t))
@@ -211,6 +230,12 @@ or the current buffer directory."
    "sc"     '(cider-connect  :which-key "Connect")
    "sf"     '(cider-find-var :which-key "Find var")))
 
+;; Rainbow delimiters
+(use-package rainbow-delimiters
+  :ensure t
+  :config
+  (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
+
 ;; Lisp nav
 (use-package lispy
   :ensure t
@@ -274,26 +299,80 @@ or the current buffer directory."
   (setq magit-completing-read-function 'ivy-completing-read)
   (setq projectile-completion-system 'ivy))
 
+(use-package find-file-in-project
+  :ensure t)
+
+(use-package writegood-mode
+  :ensure t)
+
+(use-package org
+  :ensure t
+  :config
+  (setq org-log-done t
+        org-directory "~/Documents/org"
+        org-agenda-files (list org-directory)
+        org-agenda-start-on-weekday 1
+        org-agenda-time-grid (quote ((daily today remove-match)
+                                     (0900 1100 1300 1500 1700)
+				     "......" "----------------"))
+
+        org-default-notes-file (concat org-directory "/notes.org")
+	;; org-agenda-include-diary t
+        org-todo-keywords      '((sequence "TODO" "IN_PROGRESS" "DONE"))
+        org-todo-keyword-faces '(("IN_PROGRESS" . (:foreground "#8ACCCF" :weight bold))))
+
+  (add-hook 'org-mode-hook
+            (lambda ()
+              (flyspell-mode)))
+  (add-hook 'org-mode-hook
+            (lambda ()
+              (writegood-mode))))
+
+(defun org-capture-notes ()
+  (interactive)
+  (find-file org-default-notes-file))
+
+;; (use-package evil-org
+;;   :ensure t
+;;   :after org
+;;   :config
+;;   (add-hook 'org-mode-hook 'evil-org-mode)
+;;   (add-hook 'evil-org-mode-hook
+;;             (lambda ()
+;;               (evil-org-set-key-theme)))
+;;   (require 'evil-org-agenda)
+;;   (evil-org-agenda-set-keys))
+
+(defun switch-to-other-buffer ()
+  "Switch to other buffer"
+  (interactive)
+  (switch-to-buffer (other-buffer)))
+
 ;; Basic navigation
 (general-define-key
  :keymaps '(normal visual emacs)
  :prefix  dft-prefix-key
 
- "TAB" '(switch-to-prev-buffer :which-key "Buffer prev")
- "SPC" '(helm-M-x              :which-key "M-x")
+ "TAB" '(switch-to-other-buffer :which-key "Buffer last")
+ "SPC" '(helm-M-x               :which-key "M-x")
+
+ ;; Org
+ "oa"  'org-agenda
+ "oc"  'org-capture
+ "on"  'org-capture-notes
 
  ;; Project
  "p"   '(                           :which-key "Project")
- "pf"  '(helm-find-files            :which-key "Find file")
+ "pf"  '(find-file-in-project       :which-key "Find file")
  "pt"  '(neotree-project-dir-toggle :which-key "Open tree")
  "pp"  '(projectile-switch-project  :which-key "Switch project")
  "ps"  '(helm-ag                    :which-key "Search")
  "pr"  '(projectile-recentf         :which-key "Recentf")
 
  ;; Files
- "f"   '(                    :which-key "File")
- "ff"  '(find-file           :which-key "Find file")
- "fr"  '(helm-recentf        :which-key "Recentf")
+ "f"   '(                      :which-key "File")
+ "ff"  '(find-file             :which-key "Find file")
+ "fr"  '(helm-recentf          :which-key "Recentf")
 
  ;; Buffers
  "b"   '(                      :which-key "Buffer")
@@ -314,8 +393,15 @@ or the current buffer directory."
  "wd"  '(delete-window        :which-key "Window kill")
  "wm"  '(delete-other-windows :which-key "Window maximize")
 
+ ;; Magit
+ "m"   '(magit                :which-key "Magit")
+
  ;; Others
- "t"  '(ansi-term            :which-key "Terminal"))
+ "t"   '(ansi-term            :which-key "Terminal"))
+
+(general-define-key
+ :keymaps '(normal visual)
+ "TAB" 'indent-region)
 
 ;; Global C-g override
 (general-define-key
@@ -328,3 +414,15 @@ or the current buffer directory."
  :prefix   dft-prefix-key
  "e"       '(            :which-key "Eval")
  "eb"      '(eval-buffer :which-key "Eval buffer"))
+
+;; Start org agenda on startup
+(org-agenda nil "a")
+
+;; Disable visible whitespace in calendar-mode
+(add-hook 'calendar-mode-hook
+          (function (lambda () (setq show-trailing-whitespace nil))))
+
+(add-hook 'org-mode-hook
+          '(lambda()
+             (turn-on-auto-fill)
+             (set-fill-column 80)))
