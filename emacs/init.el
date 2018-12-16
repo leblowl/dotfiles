@@ -69,7 +69,7 @@
  '(org-agenda-files (quote ("~/.notes")))
  '(package-selected-packages
    (quote
-    (rainbow-delimiters writegood-mode find-file-in-project ivy magit company cider lispyville lispy clojure-mode evil helm-ag helm telephone-line neotree projectile general which-key zenburn-theme use-package))))
+    (evil-magit pdf-tools rainbow-delimiters writegood-mode find-file-in-project ivy magit company cider lispyville lispy clojure-mode evil helm-ag helm telephone-line neotree projectile general which-key zenburn-theme use-package))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -209,7 +209,12 @@ or the current buffer directory."
   (helm-mode 1))
 
 (use-package helm-ag
-  :ensure t)
+  :ensure t
+  :config
+  ;; BUG: -W 50 causes [...] text to appear in search/replace
+  ;; functionality when replacing text, which is a big
+  ;; issue.
+  (setq helm-ag-base-command "ag --nocolor --nogroup"))
 
 ;; Vim mode
 (use-package evil
@@ -273,6 +278,11 @@ or the current buffer directory."
      additional-insert
      additional-wrap)))
 
+(defun leblowl/cider-quit ()
+  (interactive)
+  (ignore-errors (cider-quit))
+  (sesman-quit))
+
 (use-package cider
   :ensure t
   :config
@@ -280,7 +290,8 @@ or the current buffer directory."
    :states  'normal
    :keymaps 'cider-repl-mode-map
    :prefix  dft-prefix-key
-   "sc"     'cider-repl-clear-buffer))
+   "sc"     'cider-repl-clear-buffer
+   "sq"     'leblowl/cider-quit))
 
 ;; Auto completion
 (use-package company
@@ -290,6 +301,9 @@ or the current buffer directory."
 
 ;; Magit (Git)
 (use-package magit
+  :ensure t)
+
+(use-package evil-magit
   :ensure t)
 
 (use-package ivy
@@ -304,6 +318,11 @@ or the current buffer directory."
 
 (use-package writegood-mode
   :ensure t)
+
+(use-package pdf-tools
+  :ensure t
+  :config
+  (pdf-tools-install))
 
 (use-package org
   :ensure t
@@ -407,13 +426,21 @@ or the current buffer directory."
 (general-define-key
  :keymaps 'key-translation-map "ESC" "C-g")
 
-;; Emacs Lisp
+;; Emacs Lisp key bindings
 (general-define-key
  :states   'normal
  :keymaps  'emacs-lisp-mode-map
  :prefix   dft-prefix-key
  "e"       '(            :which-key "Eval")
  "eb"      '(eval-buffer :which-key "Eval buffer"))
+
+;; Clojure key bindings
+(general-define-key
+ :states   'normal
+ :keymaps  'clojure-mode-map
+ :prefix   dft-prefix-key
+ "e"       '(                  :which-key "Eval")
+ "eb"      '(cider-eval-buffer :which-key "Eval buffer"))
 
 ;; Start org agenda on startup
 (org-agenda nil "a")
