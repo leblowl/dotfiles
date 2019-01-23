@@ -1,0 +1,8 @@
+hook global WinCreate .* %{
+    add-highlighter window/ show-matching
+    set-face window MatchingChar rgb:3d3d3d,rgb:aaaaaa
+}
+
+hook global NormalKey y|d|c %{ nop %sh{
+  printf %s "$kak_main_reg_dquote" | xsel --input --clipboard
+}}
