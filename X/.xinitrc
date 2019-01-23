@@ -4,7 +4,7 @@ xset -dpms
 xset s noblank
 
 # disable laptop screen for external monitor
-xrandr --output eDP-1 --off
+# xrandr --output eDP-1 --off
 
 # map capslock to shift/escape
 setxkbmap -option ctrl:nocaps
@@ -20,10 +20,7 @@ xset b off
 pulseaudio --start
 
 # set desktop background
-feh --bg-center ~/Pictures/wallpaper/debian-grey.png &
-
-# start emacs server
-emacs --daemon
+feh --bg-fill ~/Pictures/wallpaper/MACS_J1206.jpg &
 
 # start i3 WM
 exec i3

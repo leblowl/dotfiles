@@ -22,6 +22,7 @@ order += "wireless _first_"
 order += "ethernet _first_"
 order += "battery all"
 order += "tztime local"
+order += "tztime utc"
 
 cpu_usage {
         format = "CPU U: %usage"
@@ -56,5 +57,10 @@ battery all {
 }
 
 tztime local {
-        format = "%Y-%m-%d %H:%M:%S"
+        format = "%Y-%m-%d %H:%M:%S (%z)"
+}
+
+tztime utc {
+        format = "%H:%M:%S"
+	timezone = "UTC"
 }
