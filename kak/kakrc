@@ -1,3 +1,7 @@
+colorscheme solarized-light
+
+define-command find -params 1 -shell-script-candidates %{ /usr/bin/fdfind -p -t f } %{ edit %arg{1} }
+
 hook global WinCreate .* %{
     add-highlighter window/ show-matching
     set-face window MatchingChar rgb:3d3d3d,rgb:aaaaaa
