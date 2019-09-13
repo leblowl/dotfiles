@@ -1,0 +1,46 @@
+#!/bin/bash
+
+iptables -F
+iptables -X
+iptables -t nat -F
+iptables -t nat -X
+iptables -t mangle -F
+iptables -t mangle -X
+
+iptables -P INPUT DROP
+iptables -P FORWARD DROP
+iptables -P OUTPUT DROP
+
+# Allow DNS
+iptables -A OUTPUT -p udp --dport 53 -m state --state NEW,ESTABLISHED -j ACCEPT
+iptables -A INPUT  -p udp --sport 53 -m state --state ESTABLISHED     -j ACCEPT
+iptables -A OUTPUT -p tcp --dport 53 -m state --state NEW,ESTABLISHED -j ACCEPT
+iptables -A INPUT  -p tcp --sport 53 -m state --state ESTABLISHED     -j ACCEPT
+
+# Allow local
+iptables -A INPUT -i lo -j ACCEPT
+iptables -A OUTPUT -o lo -j ACCEPT
+
+# Allow outgoing HTTP
+iptables -A OUTPUT -p tcp --dport 80 -m state --state NEW,ESTABLISHED -j ACCEPT
+iptables -A INPUT -p tcp --sport 80 -m state --state ESTABLISHED -j ACCEPT
+
+# Allow outgoing HTTPS
+iptables -A OUTPUT -p tcp --dport 443 -m state --state NEW,ESTABLISHED -j ACCEPT
+iptables -A INPUT -p tcp --sport 443 -m state --state ESTABLISHED -j ACCEPT
+
+# Allow outgoing pings
+iptables -A OUTPUT -p icmp --icmp-type echo-request -j ACCEPT
+iptables -A INPUT -p icmp --icmp-type echo-reply -j ACCEPT
+
+# Allow incoming SSH 
+iptables -A INPUT -p tcp -s ${ip} --dport ${port} -m state --state NEW,ESTABLISHED -j ACCEPT
+iptables -A OUTPUT -p tcp -d ${ip} --sport ${port} -m state --state ESTABLISHED -j ACCEPT
+
+iptables -N LOGGING
+iptables -A INPUT -j LOGGING
+iptables -A OUTPUT -j LOGGING
+iptables -A LOGGING -m limit --limit 2/min -j LOG --log-prefix "IPTables-Dropped: " --log-level 4
+iptables -A LOGGING -j DROP
+
+exit 0

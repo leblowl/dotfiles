@@ -1,0 +1,4 @@
+#!/bin/bash
+
+/etc/iptables/rules.v4
+/etc/iptables/rules.v6
