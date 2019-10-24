@@ -8,6 +8,7 @@
       initial-major-mode 'org-mode)
 
 (global-display-line-numbers-mode t)
+(setq column-number-mode t)
 
 ;; Disable tabs
 (setq tab-width 2
@@ -44,7 +45,19 @@
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
 ;; Font
-(add-to-list 'default-frame-alist '(font . "Source Code Variable"))
+(set-face-attribute
+ 'default nil
+ :family "Source Code Variable"
+ :width 'normal
+ :height 130
+ :weight 'normal
+ :stipple nil)
+
+(set-face-bold-p 'bold nil)
+
+;; Theme
+(add-to-list 'custom-theme-load-path "~/.emacs.d/emacs-color-theme-solarized")
+(load-theme 'solarized t)
 
 ;; Package configs
 (require 'package)
@@ -65,21 +78,17 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(inhibit-startup-screen t)
- '(org-agenda-files (quote ("~/.notes")))
+ '(org-agenda-files nil)
  '(package-selected-packages
    (quote
-    (evil-magit pdf-tools rainbow-delimiters writegood-mode find-file-in-project ivy magit company cider lispyville lispy clojure-mode evil helm-ag helm telephone-line neotree projectile general which-key zenburn-theme use-package))))
+    (doom-modeline evil-magit pdf-tools writegood-mode find-file-in-project ivy magit company lispyville lispy clojure-mode evil helm-ag helm neotree projectile general which-key use-package))))
+
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
-
-;; Theme
-(use-package zenburn-theme
-  :ensure t)
 
 ;; Which Key
 (use-package which-key
@@ -180,11 +189,12 @@ or the current buffer directory."
    "RET"     'neotree-enter
    "<tab>"   'neotree-enter))
 
-;; Fancy mode line
-(use-package telephone-line
-  :ensure t
-  :config
-  (telephone-line-mode 1))
+(use-package all-the-icons
+ :ensure t)
+
+(use-package doom-modeline
+ :ensure t
+ :hook (after-init . doom-modeline-mode))
 
 ;; Helm
 (use-package helm
@@ -220,36 +230,21 @@ or the current buffer directory."
 (use-package evil
   :ensure t
   :config
+  (require 'evil)
   (setq evil-want-integration 1)
   (evil-mode 1))
 
 ;; Clojure
 (use-package clojure-mode
-  :ensure t
-  :config
-  (general-define-key
-   :states  'normal
-   :keymaps 'clojure-mode-map
-   :prefix  dft-prefix-key
-   "s"      '(               :which-key "Cider")
-   "sc"     '(cider-connect  :which-key "Connect")
-   "sf"     '(cider-find-var :which-key "Find var")))
-
-;; Rainbow delimiters
-(use-package rainbow-delimiters
-  :ensure t
-  :config
-  (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
+  :ensure t)
 
 ;; Lisp nav
 (use-package lispy
   :ensure t
   :config
-  (setq lispy-compat '(cider edebug))
-
   (general-define-key
    :states  'normal
-   :keymaps '(clojure-mode-map emacs-lisp-mode-map cider-repl-mode-map)
+   :keymaps '(clojure-mode-map emacs-lisp-mode-map)
    :prefix  dft-prefix-key
    "k"      '(                    :which-key "Lispy")
    "kdx"    '(lispy-kill          :which-key "Kill")
@@ -260,8 +255,7 @@ or the current buffer directory."
    "km"     '(lispy-mark-symbol   :which-key "Mark symbol"))
 
   (add-hook 'emacs-lisp-mode-hook (lambda () (lispy-mode 1)))
-  (add-hook 'clojure-mode-hook    (lambda () (lispy-mode 1)))
-  (add-hook 'cider-repl-mode-hook (lambda () (lispy-mode 1))))
+  (add-hook 'clojure-mode-hook    (lambda () (lispy-mode 1))))
 
 ;; Lisp Evil nav
 (use-package lispyville
@@ -277,21 +271,6 @@ or the current buffer directory."
      additional
      additional-insert
      additional-wrap)))
-
-(defun leblowl/cider-quit ()
-  (interactive)
-  (ignore-errors (cider-quit))
-  (sesman-quit))
-
-(use-package cider
-  :ensure t
-  :config
-  (general-define-key
-   :states  'normal
-   :keymaps 'cider-repl-mode-map
-   :prefix  dft-prefix-key
-   "sc"     'cider-repl-clear-buffer
-   "sq"     'leblowl/cider-quit))
 
 ;; Auto completion
 (use-package company
@@ -328,7 +307,7 @@ or the current buffer directory."
   :ensure t
   :config
   (setq org-log-done t
-        org-directory "~/Documents/org"
+        org-directory "~/docs/org"
         org-agenda-files (list org-directory)
         org-agenda-start-on-weekday 1
         org-agenda-time-grid (quote ((daily today remove-match)
@@ -350,17 +329,6 @@ or the current buffer directory."
 (defun org-capture-notes ()
   (interactive)
   (find-file org-default-notes-file))
-
-;; (use-package evil-org
-;;   :ensure t
-;;   :after org
-;;   :config
-;;   (add-hook 'org-mode-hook 'evil-org-mode)
-;;   (add-hook 'evil-org-mode-hook
-;;             (lambda ()
-;;               (evil-org-set-key-theme)))
-;;   (require 'evil-org-agenda)
-;;   (evil-org-agenda-set-keys))
 
 (defun switch-to-other-buffer ()
   "Switch to other buffer"
@@ -420,7 +388,7 @@ or the current buffer directory."
 
 (general-define-key
  :keymaps '(normal visual)
- "TAB" 'indent-region)
+ "TAB"    'indent-region)
 
 ;; Global C-g override
 (general-define-key
@@ -434,17 +402,6 @@ or the current buffer directory."
  "e"       '(            :which-key "Eval")
  "eb"      '(eval-buffer :which-key "Eval buffer"))
 
-;; Clojure key bindings
-(general-define-key
- :states   'normal
- :keymaps  'clojure-mode-map
- :prefix   dft-prefix-key
- "e"       '(                  :which-key "Eval")
- "eb"      '(cider-eval-buffer :which-key "Eval buffer"))
-
-;; Start org agenda on startup
-(org-agenda nil "a")
-
 ;; Disable visible whitespace in calendar-mode
 (add-hook 'calendar-mode-hook
           (function (lambda () (setq show-trailing-whitespace nil))))
@@ -453,3 +410,8 @@ or the current buffer directory."
           '(lambda()
              (turn-on-auto-fill)
              (set-fill-column 80)))
+
+(eval-after-load "flyspell"
+    '(progn
+       (define-key flyspell-mouse-map [down-mouse-3] #'flyspell-correct-word)
+       (define-key flyspell-mouse-map [mouse-3] #'undefined)))
