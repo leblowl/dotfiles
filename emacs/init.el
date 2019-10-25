@@ -78,7 +78,6 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(org-agenda-files nil)
  '(package-selected-packages
    (quote
     (doom-modeline evil-magit pdf-tools writegood-mode find-file-in-project ivy magit company lispyville lispy clojure-mode evil helm-ag helm neotree projectile general which-key use-package))))
