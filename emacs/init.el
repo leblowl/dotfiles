@@ -59,9 +59,9 @@
 ;; Font
 (set-face-attribute
  'default nil
- :family "Source Code Pro"
+ :family "Source Code Variable"
  :width 'normal
- :height 150
+ :height 130
  :weight 'normal
  :stipple nil)
 
@@ -279,6 +279,117 @@
   :config
   (pdf-tools-install))
 
+
+;; Adapted from https://emacs.stackexchange.com/questions/38345/open-an-external-sketch-drawing-application
+
+(defvar template-svg nil
+  "Blank document for inkscape. You cannot create a file at the
+  command line, so we put this template in and open it.")
+
+(setq template-svg
+      "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>
+<svg
+   xmlns:dc=\"http://purl.org/dc/elements/1.1/\"
+   xmlns:cc=\"http://creativecommons.org/ns#\"
+   xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"
+   xmlns:svg=\"http://www.w3.org/2000/svg\"
+   xmlns=\"http://www.w3.org/2000/svg\"
+   xmlns:sodipodi=\"http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd\"
+   xmlns:inkscape=\"http://www.inkscape.org/namespaces/inkscape\"
+   width=\"210mm\"
+   height=\"210mm\"
+   viewBox=\"0 0 210 297\"
+   version=\"1.1\"
+   id=\"svg4410\"
+   inkscape:version=\"1.0.1 (3bc2e813f5, 2020-09-07)\"
+   sodipodi:docname=\"drawing.svg\">
+  <defs
+     id=\"defs4404\" />
+  <sodipodi:namedview
+     id=\"base\"
+     pagecolor=\"#ffffff\"
+     bordercolor=\"#666666\"
+     borderopacity=\"1.0\"
+     inkscape:pageopacity=\"0.0\"
+     inkscape:pageshadow=\"2\"
+     inkscape:zoom=\"0.97\"
+     inkscape:cx=\"400\"
+     inkscape:cy=\"560\"
+     inkscape:document-units=\"mm\"
+     inkscape:current-layer=\"layer1\"
+     inkscape:document-rotation=\"0\"
+     showgrid=\"false\"
+     inkscape:window-width=\"956\"
+     inkscape:window-height=\"931\"
+     inkscape:window-x=\"0\"
+     inkscape:window-y=\"0\"
+     inkscape:window-maximized=\"1\"
+     lock-margins=\"true\"
+     fit-margin-top=\"2\"
+     fit-margin-left=\"2\"
+     fit-margin-right=\"2\"
+     fit-margin-bottom=\"2\" />
+  <metadata
+     id=\"metadata4407\">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about=\"\">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource=\"http://purl.org/dc/dcmitype/StillImage\" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label=\"Layer 1\"
+     inkscape:groupmode=\"layer\"
+     id=\"layer1\" />
+</svg>")
+
+(defvar org+-missing-link-target-program "inkscape"
+  "Program for creating files for link targets.")
+
+(defvar org+-link-target-re "^file:\\(.*\\.svg\\)$"
+  "Regexp identifying file link targets.")
+
+(defun org+-electric-closing-bracket (n)
+  "Insert current character and send prefix-arg greater
+     element, check whether we are at a bracketed link Should be
+     bound to ?.  In that case start
+     org+-missing-link-target-program "
+  (interactive "p")
+  (org-self-insert-command n)
+  (when (looking-back org-bracket-link-regexp (line-beginning-position))
+    (let* ((url (match-string 1))
+           (fname (and (string-match org+-link-target-re url)
+                       (match-string 1 url))))
+
+      (when (and (> (length fname) 0)
+                 (null (file-exists-p fname))
+                 (y-or-n-p
+                  (format "File \"%s\" missing.  Create with \"%s\"? "
+                          fname
+                          org+-missing-link-target-program)))
+
+        (let ((fdir (file-name-directory fname)))
+          (when (or (null fdir) ;; no directory component
+                    (file-exists-p fdir)
+                    (when (y-or-n-p (format "Directory \"%s\" missing. Create? " fdir))
+                      (mkdir fdir t)
+                      t))
+            (with-temp-file fname
+              (insert template-svg))
+            (let ((buf (get-buffer-create "*org process*")))
+              (start-process "*org process*"
+                             buf
+                             org+-missing-link-target-program
+                             fname))))))))
+
+(defun org+-eletrify-closing-bracket ()
+  "Setup closing bracket for creating missing files."
+  (local-set-key (kbd "]") #'org+-electric-closing-bracket))
+
 (use-package org
   :ensure t
   :config
@@ -293,7 +404,7 @@
 
    org-src-tab-acts-natively t
    org-src-fontify-natively t
-   org-directory "~/Documents/org"
+   org-directory (getenv "ORG_HOME")
    org-default-notes-file (concat org-directory "/_notes.org")
 
    org-todo-keywords
@@ -308,15 +419,16 @@
      ("SKIP" . (:foreground "#859900" :weight bold)))
 
    org-capture-templates
-   '(("t"
-      "Todo [inbox]"
-      entry
-      (file+headline "~/Documents/org/_inbox.org" "Tasks")
-      "* TODO %i%?\n\n"
-      :empty-lines 2))
+   (list
+    (list "t"
+          "Todo [inbox]"
+          'entry
+          (list 'file+headline (concat org-directory "/_inbox.org") "Tasks")
+          "* TODO %i%?\n\n"
+          :empty-lines 2))
 
-   org-refile-targets '(("~/Documents/org/_track.org" :maxlevel . 3)
-                        ("~/Documents/org/_maybe.org" :level . 1))
+   org-refile-targets `((,(concat org-directory "/_track.org") :maxlevel . 3)
+                        (,(concat org-directory "/_maybe.org") :level . 1))
 
    org-enforce-todo-dependencies t
    org-log-done 'time
@@ -326,7 +438,7 @@
    ;; Agenda
    ;;
 
-   org-agenda-files '("~/Documents/org/_track.org")
+   org-agenda-files (list (concat org-directory "/_track.org"))
    org-agenda-start-on-weekday 1
    org-agenda-use-time-grid t
    org-agenda-time-grid
@@ -339,8 +451,29 @@
    org-agenda-confirm-kill t
    org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))
 
+  ;;
+  ;; Babel
+  ;;
+
+  (setq org-startup-with-inline-images "inlineimages"
+        org-image-actual-width nil
+        org-confirm-babel-evaluate nil)
+
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((dot . t)))
+
+  (eval-after-load 'org
+    (add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images))
+
+
+  ;;
+  ;; Etc.
+  ;;
 
   (add-hook 'org-mode-hook 'org-indent-mode)
+
+  (add-hook 'org-mode-hook #'org+-eletrify-closing-bracket)
 
   ;; Disable visible trailing whitespace in calendar-mode
   (add-hook 'calendar-mode-hook
@@ -362,12 +495,14 @@
    :prefix dft-prefix-key
    "o" '(:which-key "Org")
    "oa" '(org-agenda :which-key "Org agenda")
-   "ot" '(org-todo :which-key "Org status")
+   "oo" '(org-todo :which-key "Org status")
    "oy" '(org-store-link :which-key "Org store link")
    "op" '(org-insert-link :which-key "Org insert link")
    "or" '(org-refile :which-key "Org refile")
    "on" '(org-add-note :which-key "Org add note")
    "ow" '(org-save-all-org-buffers :which-key "Org write all Org buffers")
+   "ot" '(org-set-tags-command :which-key "Org set tags")
+   "os" '(org-edit-src-code)
    )
 
   (general-define-key
@@ -475,8 +610,7 @@
    "P" 'org-agenda-show-the-flagging-note
 
    "w" 'org-save-all-org-buffers
-   )
-  )
+   ))
 
 ;; From Doom Emacs
 ;; https://github.com/hlissner/doom-emacs
@@ -500,6 +634,9 @@
 
  "TAB" '(mode-line-other-buffer :which-key "Buffer last")
  "SPC" '(helm-M-x               :which-key "M-x")
+
+ ;; Help
+ "?"   '(help :which-key "Help")
 
  ;; Project
  "p"   '(                           :which-key "Project")
