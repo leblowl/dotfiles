@@ -1,0 +1,9 @@
+(setq org-directory "~/docs/org")
+
+(set-face-attribute
+ 'default nil
+ :family "Source Code Variable"
+ :width 'normal
+ :height 130
+ :weight 'normal
+ :stipple nil)

@@ -1,9 +1,11 @@
+;;
+;; Default Config
+;;
+
 (setenv "PATH" (concat "/usr/local/bin" ":" (getenv "PATH")))
 (setenv "EMACSPATH" (concat "/usr/local/bin" ":" (getenv "EMACSPATH")))
 (setq exec-path (cons "/usr/local/bin" exec-path))
-
-(setq custom-file "~/.emacs.d/custom.el")
-(load custom-file)
+(setq org-directory "~/Documents/org")
 
 (menu-bar-mode   -1)
 (tool-bar-mode   -1)
@@ -20,6 +22,17 @@
 
 (global-display-line-numbers-mode t)
 (setq column-number-mode t)
+
+;; Font
+(set-face-attribute
+ 'default nil
+ :family "Source Code Pro"
+ :width 'normal
+ :height 150
+ :weight 'normal
+ :stipple nil)
+
+(set-face-bold-p 'bold nil)
 
 ;; Disable tabs
 (setq tab-width 2)
@@ -56,17 +69,6 @@
 ;;   Delete trailing whitespace on save
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
-;; Font
-(set-face-attribute
- 'default nil
- :family "Source Code Variable"
- :width 'normal
- :height 130
- :weight 'normal
- :stipple nil)
-
-(set-face-bold-p 'bold nil)
-
 ;; Theme
 (add-to-list 'custom-theme-load-path "~/.emacs.d/emacs-color-theme-solarized")
 (load-theme 'solarized t)
@@ -78,6 +80,20 @@
                          ("gnu"   . "https://elpa.gnu.org/packages/")
                          ("melpa" . "https://melpa.org/packages/")))
 (package-initialize)
+
+;;
+;; User Config
+;;
+
+(setq config-file "~/.emacs.d/config.el")
+(load config-file)
+
+(setq custom-file "~/.emacs.d/custom.el")
+(load custom-file)
+
+;;
+;; Standard Config
+;;
 
 ;; Bootstrap `use-package`
 (unless (package-installed-p 'use-package)
@@ -394,15 +410,15 @@
 
    org-src-tab-acts-natively t
    org-src-fontify-natively t
-   org-directory (getenv "ORG_HOME")
    org-default-notes-file (concat org-directory "/_notes.org")
 
    org-todo-keywords
-   '((sequence "TODO(t)" "IN_PROGRESS(i)" "REVIEW(r)" "NEEDS_DEPLOY(n)" "|" "SKIP(s)" "DONE(d)"))
+   '((sequence "TODO(t)" "IN_PROGRESS(i)" "WAITING(w)" "REVIEW(r)" "NEEDS_DEPLOY(n)" "|" "SKIP(s)" "DONE(d)"))
 
    org-todo-keyword-faces
    '(("TODO" . (:foreground "#dc322f" :weight bold))
      ("IN_PROGRESS" . (:foreground "#b58900" :weight bold))
+     ("WAITING" . (:foreground "#b58900" :weight bold))
      ("REVIEW" . (:foreground "#6c71c4" :weight bold))
      ("NEEDS_DEPLOY" . (:foreground "#268bd2" :weight bold))
      ("DONE" . (:foreground "#859900" :weight bold))
@@ -439,7 +455,7 @@
    org-agenda-prefix-format '((todo . "|%-10b "))
    org-agenda-breadcrumbs-separator "|"
    org-agenda-confirm-kill t
-   org-agenda-sorting-strategy '(todo-state-up priority-down effort-up))
+   org-agenda-sorting-strategy '(todo-state-down priority-down effort-up))
 
   ;;
   ;; Babel
