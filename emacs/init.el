@@ -256,16 +256,6 @@
 (use-package evil-magit
   :ensure t)
 
-(use-package ivy
-  :ensure t
-  :config
-  (ivy-mode 1)
-  (setq magit-completing-read-function 'ivy-completing-read)
-  (setq projectile-completion-system 'ivy))
-
-(use-package find-file-in-project
-  :ensure t)
-
 (use-package writegood-mode
   :ensure t)
 
@@ -640,7 +630,7 @@
 
  ;; Project
  "p"   '(                           :which-key "Project")
- "pf"  '(find-file-in-project       :which-key "Find file")
+ "pf"  '(projectile-find-file       :which-key "Find file")
  "pt"  '(neotree-toggle             :which-key "Open tree")
  "pp"  '(projectile-switch-project  :which-key "Switch project")
  "ps"  '(helm-ag                    :which-key "Search")
@@ -648,7 +638,7 @@
 
  ;; Files
  "f"   '(                      :which-key "File")
- "ff"  '(find-file             :which-key "Find file")
+ "ff"  '(helm-find-files       :which-key "Find file")
  "fr"  '(helm-recentf          :which-key "Recentf")
 
  ;; Buffers
