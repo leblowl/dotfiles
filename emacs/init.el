@@ -81,6 +81,16 @@
                          ("melpa" . "https://melpa.org/packages/")))
 (package-initialize)
 
+;; Bootstrap `use-package`
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+(require 'use-package)
+
+(use-package org
+  :ensure org-plus-contrib
+  :pin org)
+
 ;;
 ;; User Config
 ;;
@@ -94,12 +104,6 @@
 ;;
 ;; Standard Config
 ;;
-
-;; Bootstrap `use-package`
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
-(require 'use-package)
 
 ;; Which Key
 (use-package which-key
@@ -180,11 +184,14 @@
         helm-imenu-fuzzy-match t
         helm-completion-in-region-fuzzy-match t
         helm-candidate-number-list 150
-        helm-split-window-in-side-p t
         helm-move-to-line-cycle-in-source t
         helm-echo-input-in-header-line t
         helm-autoresize-max-height 0
-        helm-autoresize-min-height 20)
+        helm-autoresize-min-height 20
+
+        helm-always-two-windows t
+        helm-split-window-default-side 'left
+        )
 
   :config
   (helm-mode 1))
@@ -285,6 +292,15 @@
   :config
   (pdf-tools-install))
 
+(use-package org-bullets
+  :ensure t
+  :config
+  (setq org-bullets-bullet-list '("○" "☉" "◎" "◉" "○" "◌" "◎" "●"))
+  )
+
+(use-package worf
+  :ensure t
+  )
 
 ;; Adapted from https://emacs.stackexchange.com/questions/38345/open-an-external-sketch-drawing-application
 
@@ -397,6 +413,8 @@
   (local-set-key (kbd "]") #'org+-electric-closing-bracket))
 
 (use-package org
+  :ensure org-plus-contrib
+  :pin org
   :ensure t
   :config
   (setq
@@ -410,6 +428,9 @@
 
    org-src-tab-acts-natively t
    org-src-fontify-natively t
+   org-id-link-to-org-use-id t
+   org-hide-emphasis-markers t
+   org-cycle-separator-lines 1
    org-default-notes-file (concat org-directory "/_notes.org")
 
    org-todo-keywords
@@ -477,17 +498,37 @@
   ;; Etc.
   ;;
 
-  (add-hook 'org-mode-hook 'org-indent-mode)
+  (custom-theme-set-faces
+   'user
+   `(org-level-1
+     ((t (:height 180 :extend t))))
+   `(org-level-2
+     ((t (:height 170 :extend t))))
+   `(org-level-3
+     ((t (:height 160 :extend t))))
+   `(org-level-4
+     ((t (:height 150 :extend t))))
+   )
 
-  (add-hook 'org-mode-hook #'org+-eletrify-closing-bracket)
+  (add-hook 'org-mode-hook
+            (lambda ()
+              (setq line-spacing 0.1)
+              (org-indent-mode)
+              (org+-eletrify-closing-bracket)
+              (set-fill-column 80)
+              (org-bullets-mode 1)
+              (worf-mode)
+              ))
+
 
   ;; Disable visible trailing whitespace in calendar-mode
   (add-hook 'calendar-mode-hook
             (function (lambda () (setq show-trailing-whitespace nil))))
 
-  (add-hook 'org-mode-hook
-            '(lambda ()
-               (set-fill-column 80)))
+
+  (add-hook 'org-agenda-mode-hook
+            (lambda ()
+              (setq line-spacing 0.1)))
 
   (add-to-list 'org-tag-faces '(".*" . (:foreground "black")))
 
@@ -508,7 +549,8 @@
    "on" '(org-add-note :which-key "Org add note")
    "ow" '(org-save-all-org-buffers :which-key "Org write all Org buffers")
    "ot" '(org-set-tags-command :which-key "Org set tags")
-   "os" '(org-edit-src-code)
+   "os" '(org-edit-src-code :whick-key "Org edit src block")
+   "of" '(org-roam-find-file :which-key "Org roam find file")
    )
 
   (general-define-key
@@ -617,6 +659,13 @@
 
    "w" 'org-save-all-org-buffers
    ))
+
+(use-package org-roam
+  :ensure t
+  :hook (after-init . org-roam-mode)
+  :init
+  (setq org-roam-directory org-directory)
+  )
 
 ;; From Doom Emacs
 ;; https://github.com/hlissner/doom-emacs
