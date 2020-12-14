@@ -20,19 +20,9 @@
       ring-bell-function 'ignore
       vc-follow-symlinks t)
 
+;; Line numbers
 (global-display-line-numbers-mode t)
 (setq column-number-mode t)
-
-;; Font
-(set-face-attribute
- 'default nil
- :family "Source Code Pro"
- :width 'normal
- :height 150
- :weight 'normal
- :stipple nil)
-
-(set-face-bold-p 'bold nil)
 
 ;; Disable tabs
 (setq tab-width 2)
@@ -73,7 +63,7 @@
 (add-to-list 'custom-theme-load-path "~/.emacs.d/emacs-color-theme-solarized")
 (load-theme 'solarized t)
 
-;; Package configs
+;; Packages
 (require 'package)
 (setq package-enable-at-startup nil)
 (setq package-archives '(("org"   . "https://orgmode.org/elpa/")
@@ -91,12 +81,18 @@
   :ensure org-plus-contrib
   :pin org)
 
+(use-package general
+  :ensure t)
+
 ;;
 ;; User Config
 ;;
 
 (setq config-file "~/.emacs.d/config.el")
 (load config-file)
+
+(setq custom-file "~/.emacs.d/keys.el")
+(load custom-file)
 
 (setq custom-file "~/.emacs.d/custom.el")
 (load custom-file)
@@ -113,12 +109,6 @@
   (setq which-key-prefix-prefix "+")
   :config
   (which-key-mode 1))
-
-;; Custom keybinding
-(defconst dft-prefix-key "SPC")
-
-(use-package general
-  :ensure t)
 
 ;; Projectile
 ;; https://github.com/bbatsov/projectile
@@ -149,23 +139,7 @@
    neo-show-hidden-files     t
    neo-auto-indent-point     t
    neo-modern-sidebar        t
-   neo-vc-integration        nil)
-
-  (general-define-key
-   :states   '(normal emacs)
-   :keymaps  'neotree-mode-map
-   "h"       'neotree-select-up-node
-   "l"       '(neotree-enter :which-key "enter")
-   "K"       'neotree-select-previous-sibling-node
-   "J"       'neotree-select-next-sibling-node
-   "c"       'neotree-copy-node
-   "C"       'neotree-create-node
-   "R"       'neotree-change-root
-   "r"       'neotree-rename-node
-   "o"       'neotree-open-file-in-system-application
-   "d"       'neotree-delete-node
-   "RET"     'neotree-enter
-   "<tab>"   'neotree-enter))
+   neo-vc-integration        nil))
 
 (use-package doom-modeline
   :ensure t
@@ -203,15 +177,6 @@
   ;; functionality when replacing text, which breaks replace.
   (setq helm-ag-base-command "ag --nocolor --nogroup"))
 
-;; Evil
-;; https://github.com/emacs-evil/evil
-(use-package evil
-  :ensure t
-  :config
-  (require 'evil)
-  (setq evil-want-integration 1)
-  (evil-mode 1))
-
 ;; YAML
 ;; (require 'yaml-mode)
 ;; (add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode))
@@ -219,48 +184,6 @@
 ;; Clojure
 (use-package clojure-mode
   :ensure t)
-
-;; Lisp nav
-(use-package lispy
-  :ensure t
-  :config
-  (general-define-key
-   :states  'normal
-   :keymaps '(clojure-mode-map emacs-lisp-mode-map)
-   :prefix  dft-prefix-key
-   "k"      '(                    :which-key "Lispy")
-   "kdx"    '(lispy-kill          :which-key "Kill")
-   "kdd"    '(lispy-kill-at-point :which-key "Kill at point")
-   "kdw"    '(lispy-kill-word     :which-key "Kill word")
-   "kds"    '(lispy-kill-sentence :which-key "Kill sentence")
-   "kF"     '(lispy-follow        :which-key "Follow")
-   "km"     '(lispy-mark-symbol   :which-key "Mark symbol"))
-
-  (add-hook 'emacs-lisp-mode-hook (lambda () (lispy-mode 1)))
-  (add-hook 'clojure-mode-hook    (lambda () (lispy-mode 1))))
-
-;; Lisp Evil nav
-(use-package lispyville
-  :ensure t
-  :config
-  (add-hook 'lispy-mode-hook #'lispyville-mode)
-  (lispyville-set-key-theme
-   '(operators
-     c-w
-     additional-movement
-     slurp/barf-lispy
-     wrap
-     additional
-     additional-insert
-     additional-wrap)))
-
-;; Emacs Lisp key bindings
-(general-define-key
- :states   'normal
- :keymaps  'emacs-lisp-mode-map
- :prefix   dft-prefix-key
- "e"       '(            :which-key "Eval")
- "eb"      '(eval-buffer :which-key "Eval buffer"))
 
 ;; Python
 (use-package ein
@@ -282,11 +205,6 @@
 (use-package writegood-mode
   :ensure t)
 
-(eval-after-load "flyspell"
-  '(progn
-     (define-key flyspell-mouse-map [down-mouse-3] #'flyspell-correct-word)
-     (define-key flyspell-mouse-map [mouse-3] #'undefined)))
-
 (use-package pdf-tools
   :ensure t
   :config
@@ -295,12 +213,7 @@
 (use-package org-bullets
   :ensure t
   :config
-  (setq org-bullets-bullet-list '("○" "☉" "◎" "◉" "○" "◌" "◎" "●"))
-  )
-
-(use-package worf
-  :ensure t
-  )
+  (setq org-bullets-bullet-list '("○" "☉" "◎" "◉" "○" "◌" "◎" "●")))
 
 ;; Adapted from https://emacs.stackexchange.com/questions/38345/open-an-external-sketch-drawing-application
 
@@ -375,13 +288,14 @@
 (defvar org+-link-target-re "^file:\\(.*\\.svg\\)$"
   "Regexp identifying file link targets.")
 
-(defun org+-electric-closing-bracket (n)
+(defun insert-link-special (n)
   "Insert current character and send prefix-arg greater
-     element, check whether we are at a bracketed link Should be
-     bound to ?.  In that case start
-     org+-missing-link-target-program "
+   element, check whether we are at a bracketed link Should be
+   bound to ?.  In that case start
+   org+-missing-link-target-program "
   (interactive "p")
-  (org-self-insert-command n)
+  ;; (org-self-insert-command n)
+  (org-insert-link)
   (when (looking-back org-bracket-link-regexp (line-beginning-position))
     (let* ((url (match-string 1))
            (fname (and (string-match org+-link-target-re url)
@@ -412,29 +326,30 @@
   "Setup closing bracket for creating missing files."
   (local-set-key (kbd "]") #'org+-electric-closing-bracket))
 
+(defun capture-inbox ()
+  (interactive)
+  (org-capture nil "t"))
+
 (use-package org
   :ensure org-plus-contrib
   :pin org
   :ensure t
   :config
   (setq
-
-   ;; Soft wrap
-   word-wrap t
-
-   ;;
-   ;; Org Mode
-   ;;
-
    org-src-tab-acts-natively t
    org-src-fontify-natively t
    org-id-link-to-org-use-id t
    org-hide-emphasis-markers t
    org-cycle-separator-lines 1
    org-default-notes-file (concat org-directory "/_notes.org")
+   org-enforce-todo-dependencies t
+   org-log-done 'time
+   org-export-with-sub-superscripts nil
 
    org-todo-keywords
-   '((sequence "TODO(t)" "IN_PROGRESS(i)" "WAITING(w)" "REVIEW(r)" "NEEDS_DEPLOY(n)" "|" "SKIP(s)" "DONE(d)"))
+   '((sequence "TODO(t)" "IN_PROGRESS(i)" "WAITING(w)"
+               "REVIEW(r)" "NEEDS_DEPLOY(n)"
+               "|" "SKIP(s)" "DONE(d)"))
 
    org-todo-keyword-faces
    '(("TODO" . (:foreground "#dc322f" :weight bold))
@@ -456,10 +371,6 @@
 
    org-refile-targets `((,(concat org-directory "/_track.org") :maxlevel . 3)
                         (,(concat org-directory "/_maybe.org") :level . 1))
-
-   org-enforce-todo-dependencies t
-   org-log-done 'time
-   org-export-with-sub-superscripts nil
 
    ;;
    ;; Agenda
@@ -493,22 +404,9 @@
   (eval-after-load 'org
     (add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images))
 
-
   ;;
   ;; Etc.
   ;;
-
-  (custom-theme-set-faces
-   'user
-   `(org-level-1
-     ((t (:height 180 :extend t))))
-   `(org-level-2
-     ((t (:height 170 :extend t))))
-   `(org-level-3
-     ((t (:height 160 :extend t))))
-   `(org-level-4
-     ((t (:height 150 :extend t))))
-   )
 
   (add-hook 'org-mode-hook
             (lambda ()
@@ -517,155 +415,35 @@
               (org+-eletrify-closing-bracket)
               (set-fill-column 80)
               (org-bullets-mode 1)
-              (worf-mode)
               ))
-
-
-  ;; Disable visible trailing whitespace in calendar-mode
-  (add-hook 'calendar-mode-hook
-            (function (lambda () (setq show-trailing-whitespace nil))))
-
 
   (add-hook 'org-agenda-mode-hook
             (lambda ()
               (setq line-spacing 0.1)))
 
-  (add-to-list 'org-tag-faces '(".*" . (:foreground "black")))
+  ;; Disable visible trailing whitespace in calendar-mode
+  (add-hook 'calendar-mode-hook
+            (function
+             (lambda ()
+               (setq show-trailing-whitespace nil))))
 
-  ;;
-  ;; Keybindings
-  ;;
+  ;; How to set tag face independed of H1 face?
+  ;; (setq org-tag-faces
+  ;;       '((".*" . (:foreground "black" :height 110))))
 
-  (general-define-key
-   :states 'normal
-   :keymaps '(org-mode-map org-agenda-mode-map)
-   :prefix dft-prefix-key
-   "o" '(:which-key "Org")
-   "oa" '(org-agenda :which-key "Org agenda")
-   "oo" '(org-todo :which-key "Org status")
-   "oy" '(org-store-link :which-key "Org store link")
-   "op" '(org-insert-link :which-key "Org insert link")
-   "or" '(org-refile :which-key "Org refile")
-   "on" '(org-add-note :which-key "Org add note")
-   "ow" '(org-save-all-org-buffers :which-key "Org write all Org buffers")
-   "ot" '(org-set-tags-command :which-key "Org set tags")
-   "os" '(org-edit-src-code :whick-key "Org edit src block")
-   "of" '(org-roam-find-file :which-key "Org roam find file")
-   )
-
-  (general-define-key
-   :states 'normal
-   :keymaps 'org-mode-map
-   "C-l" '(org-do-demote :which-key "Org demote heading")
-   "C-h" '(org-do-promote :which-key "Org promote heading")
-   )
-
-  (defun capture-inbox ()
-    (interactive)
-    (org-capture nil "t"))
-
-  (general-define-key
-   :keymaps '(normal visual emacs)
-   :prefix dft-prefix-key
-   "oc" '(capture-inbox :which-key "Org capture"))
+  ;; (add-to-list 'org-tag-faces '(".*" . (:foreground "red")))
 
   (add-hook 'org-capture-mode-hook 'evil-insert-state)
-
-  ;; These keybindings are modified from
-  ;; https://github.com/Somelauw/evil-org-mode/blob/master/evil-org-agenda.el
-  (evil-set-initial-state 'org-agenda-mode 'normal)
-  (general-define-key
-   :states 'normal
-   :keymaps 'org-agenda-mode-map
-
-   ;; motion
-   "j" 'org-agenda-next-line
-   "k" 'org-agenda-previous-line
-   "gj" 'org-agenda-next-item
-   "gk" 'org-agenda-previous-item
-   "gH" 'evil-window-top
-   "gM" 'evil-window-middle
-   "gL" 'evil-window-bottom
-   (kbd "[") 'org-agenda-earlier
-   (kbd "]") 'org-agenda-later
-
-   ;; manipulation
-   "J" 'org-agenda-priority-down
-   "K" 'org-agenda-priority-up
-   "H" 'org-agenda-do-date-earlier
-   "L" 'org-agenda-do-date-later
-   "t" 'org-agenda-todo
-   (kbd "M-j") 'org-agenda-drag-line-forward
-   (kbd "M-k") 'org-agenda-drag-line-backward
-
-   ;; undo
-   "u" 'org-agenda-undo
-
-   ;; actions
-   "dd" 'org-agenda-kill
-   "dA" 'org-agenda-archive
-   "da" 'org-agenda-archive-default-with-confirmation
-   "ct" 'org-agenda-set-tags
-   "ce" 'org-agenda-set-effort
-   "cT" 'org-timer-set-timer
-   "i"  'org-agenda-diary-entry
-   "gn" 'org-agenda-add-note
-   "A"  'org-agenda-append-agenda
-   "gs"  'org-agenda-schedule
-
-   ;; mark
-   "m" 'org-agenda-bulk-toggle
-   "~" 'org-agenda-bulk-toggle-all
-   "*" 'org-agenda-bulk-mark-all
-   "%" 'org-agenda-bulk-mark-regexp
-   "M" 'org-agenda-bulk-remove-all-marks
-   "x" 'org-agenda-bulk-action
-
-   ;; refresh
-   "r" 'org-agenda-redo
-
-   ;; display
-   "gD" 'org-agenda-view-mode-dispatch
-   "ZD" 'org-agenda-dim-blocked-tasks
-
-   ;; filter
-   "sc" 'org-agenda-filter-by-category
-   "sr" 'org-agenda-filter-by-regexp
-   "se" 'org-agenda-filter-by-effort
-   "st" 'org-agenda-filter-by-tag
-   "s^" 'org-agenda-filter-by-top-headline
-   "ss" 'org-agenda-limit-interactively
-   "S" 'org-agenda-filter-remove-all
-
-   ;; clock
-   "I" 'org-agenda-clock-in
-   "O" 'org-agenda-clock-out
-   "cg" 'org-agenda-clock-goto
-   "cc" 'org-agenda-clock-cancel
-   "cr" 'org-agenda-clockreport-mode
-
-   ;; go and show
-   "." 'org-agenda-goto-today
-   "gc" 'org-agenda-goto-calendar
-   "gC" 'org-agenda-convert-date
-   "gd" 'org-agenda-goto-date
-   "gh" 'org-agenda-holidays
-   "gm" 'org-agenda-phases-of-moon
-   ;; "gs" 'org-agenda-sunrise-sunset
-   "gt" 'org-agenda-show-tags
-
-   "p" 'org-agenda-date-prompt
-   "P" 'org-agenda-show-the-flagging-note
-
-   "w" 'org-save-all-org-buffers
-   ))
+  )
 
 (use-package org-roam
   :ensure t
   :hook (after-init . org-roam-mode)
   :init
-  (setq org-roam-directory org-directory)
-  )
+  (setq org-roam-directory org-directory))
+
+(use-package helm-org-rifle
+  :ensure t)
 
 ;; From Doom Emacs
 ;; https://github.com/hlissner/doom-emacs
@@ -681,66 +459,6 @@
       (setq beg (line-beginning-position)
             end (line-end-position)))
     (narrow-to-region beg end)))
-
-;; Basic navigation
-(general-define-key
- :keymaps '(normal visual emacs)
- :prefix  dft-prefix-key
-
- "TAB" '(mode-line-other-buffer :which-key "Buffer last")
- "SPC" '(helm-M-x               :which-key "M-x")
-
- ;; Help
- "?"   '(help :which-key "Help")
-
- ;; Project
- "p"   '(                           :which-key "Project")
- "pf"  '(projectile-find-file       :which-key "Find file")
- "pt"  '(neotree-toggle             :which-key "Open tree")
- "pp"  '(projectile-switch-project  :which-key "Switch project")
- "ps"  '(helm-ag                    :which-key "Search")
- "pr"  '(projectile-recentf         :which-key "Recentf")
-
- ;; Files
- "f"   '(                      :which-key "File")
- "ff"  '(helm-find-files       :which-key "Find file")
- "fr"  '(helm-recentf          :which-key "Recentf")
-
- ;; Buffers
- "b"   '(                      :which-key "Buffer")
- "h"   '(switch-to-prev-buffer :which-key "Previous")
- "l"   '(switch-to-next-buffer :which-key "Next")
- "bs"  '(switch-to-buffer      :which-key "Switch buffer")
- "bb"  '(helm-mini             :which-key "Helm mini")
- "bd"  '(kill-current-buffer   :whick-key "Kill")
-
- ;; Window
- "w"   '(                     :which-key "Window")
- "wl"  '(windmove-right       :which-key "Move right")
- "wh"  '(windmove-left        :which-key "Move left")
- "wk"  '(windmove-up          :which-key "Move up")
- "wj"  '(windmove-down        :which-key "Move bottom")
- "w/"  '(split-window-right   :which-key "Split right")
- "w-"  '(split-window-below   :which-key "Split bottom")
- "wd"  '(delete-window        :which-key "Window kill")
- "wm"  '(delete-other-windows :which-key "Window maximize")
-
- ;; Magit
- "m"   '(magit                :which-key "Magit")
-
- ;; Others
- "t"   '(ansi-term            :which-key "Terminal")
-
- ;; Editing
- "-"   '(doom/toggle-narrow-buffer :which-key "Narrow to region"))
-
-(general-define-key
- :keymaps '(normal visual)
- "TAB"    'indent-region)
-
-;; Global C-g override
-(general-define-key
- :keymaps 'key-translation-map "ESC" "C-g")
 
 (org-agenda nil "n")
 (delete-other-windows)

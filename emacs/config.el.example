@@ -7,3 +7,17 @@
  :height 130
  :weight 'normal
  :stipple nil)
+
+(set-face-bold-p 'bold nil)
+
+(custom-theme-set-faces
+   'user
+   `(org-level-1
+     ((t (:height 180))))
+   `(org-level-2
+     ((t (:height 170))))
+   `(org-level-3
+     ((t (:height 160))))
+   `(org-level-4
+     ((t (:height 150))))
+   )
