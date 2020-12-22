@@ -12,6 +12,8 @@
 
 (custom-theme-set-faces
    'user
+   `(org-document-title
+     ((t (:height 180))))
    `(org-level-1
      ((t (:height 180))))
    `(org-level-2
