@@ -6,6 +6,7 @@
 (setenv "EMACSPATH" (concat "/usr/local/bin" ":" (getenv "EMACSPATH")))
 (setq exec-path (cons "/usr/local/bin" exec-path))
 (setq org-directory "~/Documents/org")
+(add-to-list 'load-path "~/.emacs.d/lisp")
 
 (menu-bar-mode   -1)
 (tool-bar-mode   -1)
@@ -88,13 +89,14 @@
 ;; User Config
 ;;
 
-(setq config-file "~/.emacs.d/config.el")
+(setq config-file "config.el")
 (load config-file)
 
-(setq custom-file "~/.emacs.d/keys.el")
+(setq custom-file "keys.el")
 (load custom-file)
 
-(setq custom-file "~/.emacs.d/custom.el")
+(setq custom-file (concat user-emacs-directory "custom.el"))
+;; TODO: Create file if it doesn't exist
 (load custom-file)
 
 ;;
@@ -149,33 +151,26 @@
 (use-package helm
   :ensure t
   :init
-  (setq helm-M-x-fuzzy-match t
-        helm-mode-fuzzy-match t
-        helm-buffers-fuzzy-matching t
-        helm-recentf-fuzzy-match t
-        helm-locate-fuzzy-match t
-        helm-semantic-fuzzy-match t
-        helm-imenu-fuzzy-match t
-        helm-completion-in-region-fuzzy-match t
-        helm-candidate-number-list 150
-        helm-move-to-line-cycle-in-source t
-        helm-echo-input-in-header-line t
-        helm-autoresize-max-height 0
-        helm-autoresize-min-height 20
-
-        helm-always-two-windows t
-        helm-split-window-default-side 'left
-        )
-
+  (setq
+   completion-styles                 '(flex)
+   helm-buffers-fuzzy-matching       t
+   helm-recentf-fuzzy-match          t
+   helm-locate-fuzzy-match           t
+   helm-imenu-fuzzy-match            t
+   helm-allow-mouse                  t
+   helm-move-to-line-cycle-in-source t
+   helm-echo-input-in-header-line    t
+   helm-follow-mode-persistent       t
+   )
   :config
   (helm-mode 1))
 
 (use-package helm-ag
   :ensure t
   :config
-  ;; BUG: -W 50 causes [...] text to appear in search/replace
-  ;; functionality when replacing text, which breaks replace.
-  (setq helm-ag-base-command "ag --nocolor --nogroup"))
+  (defun helm-ag-org ()
+    (interactive)
+    (helm-do-ag org-directory)))
 
 ;; YAML
 ;; (require 'yaml-mode)
@@ -183,6 +178,10 @@
 
 ;; Clojure
 (use-package clojure-mode
+  :ensure t)
+
+;; Racket
+(use-package racket-mode
   :ensure t)
 
 ;; Python
@@ -340,6 +339,7 @@
    org-src-fontify-natively t
    org-id-link-to-org-use-id t
    org-hide-emphasis-markers t
+   org-hidden-keywords '(title)
    org-cycle-separator-lines 1
    org-default-notes-file (concat org-directory "/_notes.org")
    org-enforce-todo-dependencies t
@@ -399,7 +399,9 @@
 
   (org-babel-do-load-languages
    'org-babel-load-languages
-   '((dot . t)))
+   '((dot . t)
+     (emacs-lisp . t)
+     ))
 
   (eval-after-load 'org
     (add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images))
@@ -435,6 +437,12 @@
 
   (add-hook 'org-capture-mode-hook 'evil-insert-state)
   )
+
+(use-package ob-racket
+  :after org
+  :pin manual
+  :config
+  (append '((racket . t) (scribble . t)) org-babel-load-languages))
 
 (use-package org-roam
   :ensure t

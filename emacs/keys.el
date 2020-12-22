@@ -7,8 +7,14 @@
   :ensure t
   :config
   (require 'evil)
-  (setq evil-want-integration 1)
+  (setq evil-want-integration 1
+        sentence-end-double-space nil)
   (evil-mode 1))
+
+(use-package evil-surround
+  :ensure t
+  :config
+  (global-evil-surround-mode 1))
 
 ;; Global
 (general-define-key
@@ -29,8 +35,10 @@
  "?"   '(help :which-key "Help")
 
  ;; Org
- "oc" '(capture-inbox :which-key "Org capture")
- "of" '(org-roam-find-file :which-key "Org roam find file")
+ "oc"  '(capture-inbox :which-key "Org capture")
+ "of"  '()
+ "off" '(org-roam-find-file :which-key "Org roam find file")
+ "ofd" '(helm-ag-org :which-key "Org search")
 
  ;; Project
  "p"   '(                           :which-key "Project")
@@ -113,7 +121,8 @@
    "km"     '(lispy-mark-symbol   :which-key "Mark symbol"))
 
   (add-hook 'emacs-lisp-mode-hook (lambda () (lispy-mode 1)))
-  (add-hook 'clojure-mode-hook    (lambda () (lispy-mode 1))))
+  (add-hook 'clojure-mode-hook    (lambda () (lispy-mode 1)))
+  (add-hook 'racket-mode-hook     (lambda () (lispy-mode 1))))
 
 ;; Lisp Evil nav
 (use-package lispyville
