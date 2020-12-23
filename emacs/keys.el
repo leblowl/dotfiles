@@ -29,37 +29,39 @@
  :prefix  dft-prefix-key
 
  "TAB" '(mode-line-other-buffer :which-key "Buffer last")
- "SPC" '(helm-M-x               :which-key "M-x")
+ "SPC" '(counsel-M-x            :which-key "M-x")
 
  ;; Help
  "?"   '(help :which-key "Help")
+ "/"   '()
+ "/v"  '(counsel-describe-variable :which-key "Describe variable")
+ "/f"  '(counsel-describe-function :which-key "Describe function")
 
  ;; Org
- "oc"  '(capture-inbox :which-key "Org capture")
+ "oc"  '(capture-inbox      :which-key "Org capture")
  "of"  '()
  "off" '(org-roam-find-file :which-key "Org roam find file")
- "ofd" '(helm-ag-org :which-key "Org search")
 
  ;; Project
- "p"   '(                           :which-key "Project")
- "pf"  '(projectile-find-file       :which-key "Find file")
- "pt"  '(neotree-toggle             :which-key "Open tree")
- "pp"  '(projectile-switch-project  :which-key "Switch project")
- "ps"  '(helm-ag                    :which-key "Search")
- "pr"  '(projectile-recentf         :which-key "Recentf")
+ "p"   '(                            :which-key "Project")
+ "pf"  '(projectile-find-file        :which-key "Find file")
+ "pt"  '(neotree-toggle              :which-key "Open tree")
+ "pp"  '(projectile-switch-project   :which-key "Switch project")
+ "ps"  '(counsel-ag                  :which-key "Ag search")
+ "pa"  '(counsel-ag1                 :which-key "Ag search limit 1 result per file")
+ "pb"  '(projectile-switch-to-buffer :which-key "Recentf")
 
  ;; Files
  "f"   '(                      :which-key "File")
- "ff"  '(helm-find-files       :which-key "Find file")
- "fr"  '(helm-recentf          :which-key "Recentf")
+ "ff"  '(counsel-find-file     :which-key "Find file")
+ "fr"  '(counsel-recentf       :which-key "Recentf")
 
  ;; Buffers
  "b"   '(                      :which-key "Buffer")
  "h"   '(switch-to-prev-buffer :which-key "Previous")
  "l"   '(switch-to-next-buffer :which-key "Next")
- "bs"  '(switch-to-buffer      :which-key "Switch buffer")
- "bb"  '(helm-mini             :which-key "Helm mini")
- "bd"  '(kill-current-buffer   :whick-key "Kill")
+ "bb"  '(counsel-switch-buffer :which-key "Switch buffer")
+ "bd"  '(kill-current-buffer   :whick-key "Kill current buffer")
 
  ;; Window
  "w"   '(                     :which-key "Window")

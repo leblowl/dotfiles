@@ -117,6 +117,7 @@
 (use-package projectile
   :ensure t
   :config
+  (setq projectile-completion-system 'ivy)
   (projectile-mode 1))
 
 ;; ALL THE ICONS
@@ -148,22 +149,36 @@
   :hook (after-init . doom-modeline-mode))
 
 ;; Helm
-(use-package helm
+;; (use-package helm
+;;   :ensure t
+;;   :init
+;;   (setq
+;;    completion-styles                 '(flex)
+;;    helm-buffers-fuzzy-matching       t
+;;    helm-recentf-fuzzy-match          t
+;;    helm-locate-fuzzy-match           t
+;;    helm-imenu-fuzzy-match            t
+;;    helm-allow-mouse                  t
+;;    helm-move-to-line-cycle-in-source t
+;;    helm-echo-input-in-header-line    t
+;;    helm-follow-mode-persistent       t
+;;    helm-grep-file-path-style 'relative)
+;;   :config
+;;   (helm-mode 1))
+
+(use-package counsel
   :ensure t
-  :init
-  (setq
-   completion-styles                 '(flex)
-   helm-buffers-fuzzy-matching       t
-   helm-recentf-fuzzy-match          t
-   helm-locate-fuzzy-match           t
-   helm-imenu-fuzzy-match            t
-   helm-allow-mouse                  t
-   helm-move-to-line-cycle-in-source t
-   helm-echo-input-in-header-line    t
-   helm-follow-mode-persistent       t
-   )
   :config
-  (helm-mode 1))
+  (setq ivy-height 30
+        ivy-use-virtual-buffers t
+        counsel-ag-base-command "aggy %s"
+        )
+
+  (defun counsel-ag1 ()
+    "counsel-ag with 1 result per file"
+    (interactive)
+    (counsel-ag nil nil "-m 1 --silent -- "))
+  )
 
 (use-package helm-ag
   :ensure t
@@ -448,10 +463,11 @@
   :ensure t
   :hook (after-init . org-roam-mode)
   :init
-  (setq org-roam-directory org-directory))
+  (setq org-roam-directory org-directory
+        org-roam-completion-system 'ivy))
 
-(use-package helm-org-rifle
-  :ensure t)
+;; (use-package helm-org-rifle
+;;   :ensure t)
 
 ;; From Doom Emacs
 ;; https://github.com/hlissner/doom-emacs
