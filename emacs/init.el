@@ -169,16 +169,29 @@
 (use-package counsel
   :ensure t
   :config
-  (setq ivy-height 30
-        ivy-use-virtual-buffers t
-        counsel-ag-base-command "aggy %s"
-        )
-
   (defun counsel-ag1 ()
     "counsel-ag with 1 result per file"
     (interactive)
     (counsel-ag nil nil "-m 1 --silent -- "))
-  )
+
+  (defun ivy-yank-action (x)
+    (kill-new x))
+
+  (defun ivy-copy-to-buffer-action (x)
+    (with-ivy-window
+      (insert x)))
+
+  (ivy-set-actions
+   t
+   '(("i" ivy-copy-to-buffer-action "insert")
+     ("y" ivy-yank-action "yank")))
+
+  (setq ivy-height 30
+        ivy-use-virtual-buffers t
+        counsel-ag-base-command "aggy --hidden %s"
+        )
+
+  (ivy-mode 1))
 
 (use-package helm-ag
   :ensure t
@@ -188,8 +201,8 @@
     (helm-do-ag org-directory)))
 
 ;; YAML
-;; (require 'yaml-mode)
-;; (add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode))
+(require 'yaml-mode)
+(add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode))
 
 ;; Clojure
 (use-package clojure-mode
@@ -200,8 +213,27 @@
   :ensure t)
 
 ;; Python
+(use-package python
+  :config
+  (setq python-fill-docstring-style 'symmetric)
+
+  )
+
 (use-package ein
   :ensure t)
+
+(use-package lpy
+  :ensure t)
+
+(use-package elpy
+  :ensure t
+  :init
+  (elpy-enable)
+  :config
+  (setq elpy-rpc-python-command "~/.pyenv/shims/python3.8")
+  (highlight-indentation-mode -1)
+  (delete `elpy-module-highlight-indentation elpy-modules)
+  )
 
 ;; Auto completion
 (use-package company
@@ -211,7 +243,11 @@
 
 ;; Magit (Git)
 (use-package magit
-  :ensure t)
+  :ensure t
+  :config
+  ;; (setq magit-diff-refine-hunk 'all)
+ (setq ediff-window-setup-function 'ediff-setup-windows-plain)
+  )
 
 (use-package evil-magit
   :ensure t)
@@ -380,7 +416,7 @@
     (list "t"
           "Todo [inbox]"
           'entry
-          (list 'file+headline (concat org-directory "/_inbox.org") "Tasks")
+          (list 'file (concat org-directory "/_track.org"))
           "* TODO %i%?\n\n"
           :empty-lines 2))
 
@@ -399,7 +435,8 @@
      (0900 1100 1300 1500 1900)
      "......" "----------------")
 
-   org-agenda-prefix-format '((todo . "|%-10b "))
+   org-agenda-prefix-format '((todo . "|%b "))
+   org-agenda-tags-column 0
    org-agenda-breadcrumbs-separator "|"
    org-agenda-confirm-kill t
    org-agenda-sorting-strategy '(todo-state-down priority-down effort-up))
@@ -416,6 +453,7 @@
    'org-babel-load-languages
    '((dot . t)
      (emacs-lisp . t)
+     (python . t)
      ))
 
   (eval-after-load 'org
@@ -464,10 +502,22 @@
   :hook (after-init . org-roam-mode)
   :init
   (setq org-roam-directory org-directory
-        org-roam-completion-system 'ivy))
+        org-roam-completion-system 'ivy
+        org-roam-capture-templates
+        '(("d" "default" plain #'org-roam-capture--get-point
+           "%?"
+           :file-name "${slug}"
+           :head "#+title: ${title}
+#+created: %<%Y-%m-%d  %H:%M:%S>
+
+* "
+           :unnarrowed t))))
 
 ;; (use-package helm-org-rifle
 ;;   :ensure t)
+
+(use-package worf
+  :ensure t)
 
 ;; From Doom Emacs
 ;; https://github.com/hlissner/doom-emacs
@@ -486,3 +536,4 @@
 
 (org-agenda nil "n")
 (delete-other-windows)
+(put 'upcase-region 'disabled nil)

@@ -198,7 +198,7 @@
 ;;
 ;; These keybindings are modified from
 ;; https://github.com/Somelauw/evil-org-mode/blob/master/evil-org-agenda.el
-;; (evil-set-initial-state 'org-agenda-mode 'normal)
+(evil-set-initial-state 'org-agenda-mode 'normal)
 (general-define-key
  :states 'normal
  :keymaps 'org-agenda-mode-map
