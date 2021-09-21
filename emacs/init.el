@@ -235,6 +235,16 @@
   (delete `elpy-module-highlight-indentation elpy-modules)
   )
 
+;; C++
+(use-package cc-mode
+  :config
+  (setq c-basic-offset 2
+        c-default-style "k&r"))
+
+;; Haskell
+(use-package haskell-mode
+  :ensure t)
+
 ;; Auto completion
 (use-package company
   :ensure t
