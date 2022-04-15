@@ -1,6 +1,7 @@
 ;;
 ;; Default Config
 ;;
+(eval-when-compile (require 'cl))
 
 (setenv "PATH" (concat "/usr/local/bin" ":" (getenv "PATH")))
 (setenv "EMACSPATH" (concat "/usr/local/bin" ":" (getenv "EMACSPATH")))
@@ -235,6 +236,10 @@
   (delete `elpy-module-highlight-indentation elpy-modules)
   )
 
+(add-hook 'java-mode-hook
+          (lambda ()
+            (setq c-basic-offset 4)))
+
 ;; C++
 (use-package cc-mode
   :config
@@ -244,6 +249,13 @@
 ;; Haskell
 (use-package haskell-mode
   :ensure t)
+
+;; Golang
+(use-package go-mode
+  :ensure t
+  :config
+  (autoload 'go-mode "go-mode" nil t)
+  (add-to-list 'auto-mode-alist '("\\.go\\'" . go-mode)))
 
 ;; Auto completion
 (use-package company
@@ -256,7 +268,7 @@
   :ensure t
   :config
   ;; (setq magit-diff-refine-hunk 'all)
- (setq ediff-window-setup-function 'ediff-setup-windows-plain)
+  (setq ediff-window-setup-function 'ediff-setup-windows-plain)
   )
 
 (use-package evil-magit
@@ -390,12 +402,33 @@
   (interactive)
   (org-capture nil "t"))
 
+;; Adapted from https://emacs.stackexchange.com/a/26369
+(defun cmp-date-property (prop)
+  "Compare two `org-mode' agenda entries, `A' and `B', by some date property.
+
+If a is before b, return -1. If a is after b, return 1. If they
+are equal return nil."
+  (lexical-let ((prop prop))
+    #'(lambda (a b)
+
+        (let* ((a-pos (get-text-property 0 'org-marker a))
+               (b-pos (get-text-property 0 'org-marker b))
+               (a-date (or (org-entry-get a-pos prop)
+                           "1900-01-01T00:00:00+00:00"))
+               (b-date (or (org-entry-get b-pos prop)
+                           "1900-01-01T00:00:00+00:00"))
+               (cmp (compare-strings a-date nil nil b-date nil nil))
+               )
+          (if (eq cmp t) nil (signum cmp))
+          ))))
+
 (use-package org
   :ensure org-plus-contrib
   :pin org
   :ensure t
   :config
   (setq
+   org-startup-folded t
    org-src-tab-acts-natively t
    org-src-fontify-natively t
    org-id-link-to-org-use-id t
@@ -405,12 +438,13 @@
    org-default-notes-file (concat org-directory "/_notes.org")
    org-enforce-todo-dependencies t
    org-log-done 'time
+   org-log-into-drawer t
    org-export-with-sub-superscripts nil
 
    org-todo-keywords
-   '((sequence "TODO(t)" "IN_PROGRESS(i)" "WAITING(w)"
-               "REVIEW(r)" "NEEDS_DEPLOY(n)"
-               "|" "SKIP(s)" "DONE(d)"))
+   '((sequence "TODO(t!)" "IN_PROGRESS(i!)" "WAITING(w!)"
+               "REVIEW(r!)" "NEEDS_DEPLOY(n!)"
+               "|" "SKIP(s!)" "DONE(d!)"))
 
    org-todo-keyword-faces
    '(("TODO" . (:foreground "#dc322f" :weight bold))
@@ -433,6 +467,13 @@
    org-refile-targets `((,(concat org-directory "/_track.org") :maxlevel . 3)
                         (,(concat org-directory "/_maybe.org") :level . 1))
 
+   ;; Hack for now - figure out why xdg-open config isn't working!
+   org-file-apps
+   '((auto-mode . emacs)
+     ("\\.m4a\\'" . "xdg-open %s")
+     ("\\.heic\\'" . "xdg-open %s")
+     )
+
    ;;
    ;; Agenda
    ;;
@@ -449,7 +490,19 @@
    org-agenda-tags-column 0
    org-agenda-breadcrumbs-separator "|"
    org-agenda-confirm-kill t
-   org-agenda-sorting-strategy '(todo-state-down priority-down effort-up))
+   org-agenda-cmp-user-defined (cmp-date-property "CREATED")
+   org-agenda-sorting-strategy '(todo-state-down priority-down user-defined-down))
+
+  ;; Adapted from https://emacs.stackexchange.com/a/21302
+  (defun org-set-created-property (&optional active)
+    (interactive)
+    (let* ((now (format "[%s]" (format-time-string "%FT%T%:z"))))
+      (unless (org-entry-get (point) "CREATED" nil)
+        (org-set-property "CREATED" now))))
+
+  (add-hook 'org-capture-before-finalize-hook #'org-set-created-property)
+  (add-hook 'org-mode-hook 'org-hide-block-all)
+
 
   ;;
   ;; Babel

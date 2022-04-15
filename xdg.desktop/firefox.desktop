@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=firefox
+Comment=Firefox web browser
+Terminal=false
+Exec=env MOZ_ENABLE_WAYLAND=1 firefox %U

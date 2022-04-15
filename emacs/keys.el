@@ -47,8 +47,8 @@
  "pf"  '(projectile-find-file        :which-key "Find file")
  "pt"  '(neotree-toggle              :which-key "Open tree")
  "pp"  '(projectile-switch-project   :which-key "Switch project")
- "ps"  '(counsel-ag                  :which-key "Ag search")
- "pa"  '(counsel-ag1                 :which-key "Ag search limit 1 result per file")
+ "pa"  '(counsel-ag                  :which-key "Ag search")
+ "ps"  '(counsel-ag1                 :which-key "Ag search limit 1 result per file")
  "pb"  '(projectile-switch-to-buffer :which-key "Recentf")
 
  ;; Files
@@ -97,6 +97,7 @@
  "r"       'neotree-rename-node
  "o"       'neotree-open-file-in-system-application
  "d"       'neotree-delete-node
+ "y"       'neotree-copy-filepath-to-yank-ring
  "RET"     'neotree-enter
  "<tab>"   'neotree-enter)
 
@@ -177,6 +178,7 @@
  :prefix dft-prefix-key
  "o"  '(:which-key "Org")
  "oa" '(org-agenda :which-key "Org agenda")
+ "ob" '(org-roam-buffer-toggle-display :which-key "Org Roam buffer")
  "oo" '(org-todo :which-key "Org status")
  "oy" '(org-store-link :which-key "Org store link")
  "op" '(org-insert-link :which-key "Org insert link")
