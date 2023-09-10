@@ -5,11 +5,18 @@
 ;; https://github.com/emacs-evil/evil
 (use-package evil
   :ensure t
-  :config
-  (require 'evil)
-  (setq evil-want-integration 1
+  :init
+  (setq evil-want-integration t
+        evil-want-keybinding nil
         sentence-end-double-space nil)
+  :config
   (evil-mode 1))
+
+(use-package evil-collection
+  :after evil
+  :ensure t
+  :config
+  (evil-collection-init))
 
 (use-package evil-surround
   :ensure t
@@ -40,7 +47,7 @@
  ;; Org
  "oc"  '(capture-inbox      :which-key "Org capture")
  "of"  '()
- "off" '(org-roam-find-file :which-key "Org roam find file")
+ "off" '(org-roam-node-find :which-key "Org roam find file")
 
  ;; Project
  "p"   '(                            :which-key "Project")
@@ -143,34 +150,31 @@
      additional-wrap)))
 
 ;; Emacs Lisp key bindings
-;; TODO: I would like to make this command available in scratch buffers as well.
+;; TODO: Make this command available in scratch buffers as well
 (general-define-key
  :states   'normal
  :keymaps  'emacs-lisp-mode-map
  :prefix   dft-prefix-key
- "e"       '(            :which-key "Eval")
- "eb"      '(eval-buffer :which-key "Eval buffer"))
+ "e"       '(                :which-key "Eval")
+ "eb"      '(eval-buffer     :which-key "Eval buffer")
+ "ee"      '(eval-expression :which-key "Eval expression"))
 
 ;; Org Mode
+;; NOTE: Add (require 'cl) (require 'hydra) to worf.el whenever upgrading
 (use-package worf
   :ensure t
   :config
   (add-hook 'org-mode-hook
             (lambda ()
-              (worf-mode)))
-  )
+              (worf-mode))))
 
 (use-package evil-org
   :ensure t
   :after org
+  :hook (org-mode . (lambda () evil-org-mode))
   :config
-  (add-hook 'org-mode-hook 'evil-org-mode)
-  ;; (add-hook 'evil-org-mode-hook
-  ;;           (lambda ()
-  ;;             (evil-org-set-key-theme)))
-  ;; (require 'evil-org-agenda)
-  ;; (evil-org-agenda-set-keys)
-  )
+  (require 'evil-org-agenda)
+  (evil-org-agenda-set-keys))
 
 (general-define-key
  :states 'normal
@@ -186,21 +190,20 @@
  "on" '(org-add-note :which-key "Org add note")
  "ow" '(org-save-all-org-buffers :which-key "Org write all Org buffers")
  "ot" '(org-set-tags-command :which-key "Org set tags")
- "os" '(org-edit-src-code :whick-key "Org edit src block")
- )
+ "os" '(org-edit-src-code :whick-key "Org edit src block"))
 
 (general-define-key
  :states 'normal
  :keymaps 'org-mode-map
  "C-l" '(org-do-demote :which-key "Org demote heading")
- "C-h" '(org-do-promote :which-key "Org promote heading")
- )
+ "C-h" '(org-do-promote :which-key "Org promote heading"))
 
 ;; Org Agenda
 ;;
 ;; These keybindings are modified from
 ;; https://github.com/Somelauw/evil-org-mode/blob/master/evil-org-agenda.el
 (evil-set-initial-state 'org-agenda-mode 'normal)
+
 (general-define-key
  :states 'normal
  :keymaps 'org-agenda-mode-map

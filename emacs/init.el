@@ -1,7 +1,7 @@
+
 ;;
 ;; Default Config
 ;;
-(eval-when-compile (require 'cl))
 
 (setenv "PATH" (concat "/usr/local/bin" ":" (getenv "PATH")))
 (setenv "EMACSPATH" (concat "/usr/local/bin" ":" (getenv "EMACSPATH")))
@@ -68,8 +68,7 @@
 ;; Packages
 (require 'package)
 (setq package-enable-at-startup nil)
-(setq package-archives '(("org"   . "https://orgmode.org/elpa/")
-                         ("gnu"   . "https://elpa.gnu.org/packages/")
+(setq package-archives '(("gnu"   . "https://elpa.gnu.org/packages/")
                          ("melpa" . "https://melpa.org/packages/")))
 (package-initialize)
 
@@ -80,8 +79,7 @@
 (require 'use-package)
 
 (use-package org
-  :ensure org-plus-contrib
-  :pin org)
+  :pin gnu)
 
 (use-package general
   :ensure t)
@@ -121,9 +119,9 @@
   (setq projectile-completion-system 'ivy)
   (projectile-mode 1))
 
-;; ALL THE ICONS
-;; https://github.com/domtronn/all-the-icons.el
-(use-package all-the-icons
+;; nerd-icons.el
+;; https://github.com/rainstormstudio/nerd-icons.el
+(use-package nerd-icons
   :ensure t)
 
 ;; emacs-neotree
@@ -189,8 +187,8 @@
 
   (setq ivy-height 30
         ivy-use-virtual-buffers t
-        counsel-ag-base-command "aggy --hidden %s"
-        )
+        ivy-use-selectable-prompt t
+        counsel-ag-base-command "aggy --hidden %s")
 
   (ivy-mode 1))
 
@@ -201,9 +199,38 @@
     (interactive)
     (helm-do-ag org-directory)))
 
+(use-package treesit
+  :init
+  (setq treesit-language-source-alist
+        '((bash       . ("https://github.com/tree-sitter/tree-sitter-bash"))
+          (c          . ("https://github.com/tree-sitter/tree-sitter-c"))
+          (cpp        . ("https://github.com/tree-sitter/tree-sitter-cpp"))
+          (css        . ("https://github.com/tree-sitter/tree-sitter-css"))
+          (go         . ("https://github.com/tree-sitter/tree-sitter-go"))
+          (html       . ("https://github.com/tree-sitter/tree-sitter-html"))
+          (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript"))
+          (json       . ("https://github.com/tree-sitter/tree-sitter-json"))
+          (python     . ("https://github.com/tree-sitter/tree-sitter-python"))
+          (typescript . ("https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src"))
+          (tsx        . ("https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src"))
+          (ruby       . ("https://github.com/tree-sitter/tree-sitter-ruby"))
+          (rust       . ("https://github.com/tree-sitter/tree-sitter-rust"))))
+
+  (setq major-mode-remap-alist
+        '((yaml-mode       . yaml-ts-mode)
+          (js-mode         . js-ts-mode)
+          (typescript-mode . typescript-ts-mode)
+          (js-json-mode    . json-ts-mode)
+          (css-mode        . css-ts-mode)
+          (python-mode     . python-ts-mode)))
+
+  (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
+  (add-to-list 'auto-mode-alist '("\\.tsx\\'" . tsx-ts-mode)))
+
 ;; YAML
 (require 'yaml-mode)
 (add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode))
+(add-to-list 'auto-mode-alist '("\\.yaml\\'" . yaml-mode))
 
 ;; Clojure
 (use-package clojure-mode
@@ -216,9 +243,7 @@
 ;; Python
 (use-package python
   :config
-  (setq python-fill-docstring-style 'symmetric)
-
-  )
+  (setq python-fill-docstring-style 'symmetric))
 
 (use-package ein
   :ensure t)
@@ -233,8 +258,7 @@
   :config
   (setq elpy-rpc-python-command "~/.pyenv/shims/python3.8")
   (highlight-indentation-mode -1)
-  (delete `elpy-module-highlight-indentation elpy-modules)
-  )
+  (delete `elpy-module-highlight-indentation elpy-modules))
 
 (add-hook 'java-mode-hook
           (lambda ()
@@ -267,12 +291,7 @@
 (use-package magit
   :ensure t
   :config
-  ;; (setq magit-diff-refine-hunk 'all)
-  (setq ediff-window-setup-function 'ediff-setup-windows-plain)
-  )
-
-(use-package evil-magit
-  :ensure t)
+  (setq ediff-window-setup-function 'ediff-setup-windows-plain))
 
 (use-package writegood-mode
   :ensure t)
@@ -419,12 +438,10 @@ are equal return nil."
                            "1900-01-01T00:00:00+00:00"))
                (cmp (compare-strings a-date nil nil b-date nil nil))
                )
-          (if (eq cmp t) nil (signum cmp))
-          ))))
+          (if (eq cmp t) nil (signum cmp))))))
 
 (use-package org
-  :ensure org-plus-contrib
-  :pin org
+  :pin gnu
   :ensure t
   :config
   (setq
@@ -471,8 +488,7 @@ are equal return nil."
    org-file-apps
    '((auto-mode . emacs)
      ("\\.m4a\\'" . "xdg-open %s")
-     ("\\.heic\\'" . "xdg-open %s")
-     )
+     ("\\.heic\\'" . "xdg-open %s"))
 
    ;;
    ;; Agenda
@@ -516,8 +532,7 @@ are equal return nil."
    'org-babel-load-languages
    '((dot . t)
      (emacs-lisp . t)
-     (python . t)
-     ))
+     (python . t)))
 
   (eval-after-load 'org
     (add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images))
@@ -551,8 +566,7 @@ are equal return nil."
 
   ;; (add-to-list 'org-tag-faces '(".*" . (:foreground "red")))
 
-  (add-hook 'org-capture-mode-hook 'evil-insert-state)
-  )
+  (add-hook 'org-capture-mode-hook 'evil-insert-state))
 
 (use-package ob-racket
   :after org
@@ -567,20 +581,13 @@ are equal return nil."
   (setq org-roam-directory org-directory
         org-roam-completion-system 'ivy
         org-roam-capture-templates
-        '(("d" "default" plain #'org-roam-capture--get-point
-           "%?"
-           :file-name "${slug}"
-           :head "#+title: ${title}
-#+created: %<%Y-%m-%d  %H:%M:%S>
-
-* "
-           :unnarrowed t))))
-
-;; (use-package helm-org-rifle
-;;   :ensure t)
-
-(use-package worf
-  :ensure t)
+        '(("d" "default" plain "%?"
+           :target (file+head "${slug}.org"
+                              "#+title: ${title}\n#+created: %<%Y-%m-%d  %H:%M:%S>\n\n")
+           :unnarrowed t)))
+  :config
+  (setq org-roam-node-display-template "${title:*} ${tags:10}}")
+  (org-roam-db-autosync-mode))
 
 ;; From Doom Emacs
 ;; https://github.com/hlissner/doom-emacs
